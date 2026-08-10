@@ -18,6 +18,13 @@ REPO = os.path.dirname(HERE)
 
 # Where the lab lives. Override with LAB_DIR if you moved it.
 LAB = os.environ.get("LAB_DIR", r"C:\rhcsa")
+# The SSH key lives with the original lab, not next to this script. Check the real
+# locations in order rather than assuming, or ssh silently falls back to a password prompt.
+KEY_CANDIDATES = [
+    r"C:\Users\SnatchedYourChain\New folder\rhcsa-lab\.ssh\lab_key",
+    os.path.join(LAB, ".ssh", "lab_key"),
+    os.path.join(REPO, ".ssh", "lab_key"),
+]
 
 NODES = {
     "node1": {"port": 2201, "title": "node1 - system under test"},
@@ -39,9 +46,7 @@ def launch_terminal(node, task=None):
     if not info:
         return False, f"unknown node: {node}"
 
-    key = os.path.join(LAB, ".ssh", "lab_key")
-    if not os.path.exists(key):
-        key = os.path.join(REPO, ".ssh", "lab_key")
+    key = next((k for k in KEY_CANDIDATES if os.path.exists(k)), KEY_CANDIDATES[0])
     ssh = (f'ssh -i "{key}" -o StrictHostKeyChecking=no '
            f'-o UserKnownHostsFile=/dev/null -o LogLevel=ERROR '
            f'-p {info["port"]} root@127.0.0.1')

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>RHCSA Drill</title>
+<style>
+  :root{
+    --bg:#080a08; --card:#0f130f; --line:#1e3a1e; --ink:#d6e0d6; --dim:#7d8a7d;
+    --green:#4af626; --green2:#2fbf1a; --red:#ff4d4d; --amber:#ffb000;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:16px;
+       line-height:1.5;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+  .wrap{max-width:640px;margin:0 auto;padding:14px 14px 90px}
+
+  header{display:flex;align-items:center;gap:10px;padding:6px 0 12px;border-bottom:1px solid var(--line)}
+  .hat{width:34px;height:23px;flex:none}
+  header h1{font-size:15px;margin:0;color:var(--green);letter-spacing:1px;flex:1}
+  .score{font-size:13px;color:var(--dim)}
+  .score b{color:var(--green)}
+
+  .catbar{display:flex;gap:6px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+  .catbar::-webkit-scrollbar{display:none}
+  .cat{flex:none;font:inherit;font-size:12px;padding:7px 12px;border:1px solid var(--line);
+       background:#0c110c;color:var(--dim);border-radius:20px;cursor:pointer;white-space:nowrap}
+  .cat.on{background:var(--green2);color:#000;border-color:var(--green2);font-weight:700}
+
+  .tag{display:inline-block;font-size:11px;letter-spacing:1px;color:var(--dim);
+       border:1px solid var(--line);padding:2px 8px;border-radius:3px;margin-bottom:12px}
+  .q{font-size:17px;line-height:1.55;margin:0 0 18px}
+  .q em{color:var(--amber);font-style:normal}
+  .q code{color:var(--amber);font-size:15px}
+
+  .opt{display:block;width:100%;text-align:left;font:inherit;font-size:15px;line-height:1.45;
+       padding:15px 16px;margin-bottom:10px;border:1px solid var(--line);background:var(--card);
+       color:var(--ink);border-radius:8px;cursor:pointer;transition:all .12s}
+  .opt:active{transform:scale(.985)}
+  .opt.right{border-color:var(--green);background:#0d1f0a;color:var(--green)}
+  .opt.wrong{border-color:var(--red);background:#1f0a0a;color:var(--red)}
+  .opt.reveal{border-color:var(--green2);color:var(--green2)}
+  .opt code{font-size:14px;color:inherit}
+  .opt:disabled{cursor:default}
+
+  .expl{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+  .expl.on{display:block}
+  .lbl{font-size:11px;letter-spacing:1.5px;font-weight:700;display:block;margin-bottom:4px}
+  .give .lbl{color:var(--red)} .know .lbl{color:#5aa9ff}
+  .give,.know{margin-bottom:14px;font-size:15px;line-height:1.55}
+  .give p,.know p{margin:0}
+  .give code,.know code{color:var(--amber);font-size:14px}
+
+  .next{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+        background:linear-gradient(180deg,transparent,var(--bg) 30%)}
+  .next button{width:100%;max-width:612px;margin:0 auto;display:block;font:inherit;font-size:16px;
+               font-weight:700;padding:16px;border:0;border-radius:8px;background:var(--green2);
+               color:#000;cursor:pointer;letter-spacing:1px}
+  .next button:active{background:var(--green)}
+  .hidden{display:none!important}
+  .done{text-align:center;padding:40px 10px}
+  .done h2{color:var(--green);font-size:26px;margin:0 0 6px}
+  .done p{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="hat" viewBox="0 0 120 80"><ellipse cx="60" cy="62" rx="52" ry="12" fill="#cc0000"/>
+      <path d="M18 60 C18 34 34 20 60 20 C86 20 102 34 102 60 Z" fill="#cc0000"/></svg>
+    <h1>RHCSA DRILL</h1>
+    <div class="score"><b id="ok">0</b>/<span id="tot">0</span></div>
+  </header>
+
+  <div class="catbar" id="cats"></div>
+  <div id="card"></div>
+</div>
+
+<div class="next hidden" id="nextbar"><button id="nextbtn">Next question</button></div>
+
+<script>
+/* Each item: q question, o options, a index of the right one,
+   g the giveaway phrase in the question, k what you are meant to know. */
+const BANK = [
+/* ---------------------------------------------------------------- sequences */
+{c:"Which sequence",q:"<em>Add a 2G swap partition that activates automatically at boot.</em><br>Which sequence?",
+ o:["SERVICE","STORAGE","KERNEL"],a:1,
+ g:"“partition” and “swap” are storage words.",
+ k:"STORAGE = make it → format it → mount it → fstab it → <code>mount -a</code>."},
+
+{c:"Which sequence",q:"<em>Configure vsftpd for anonymous download. It must still work after a reboot.</em><br>Which sequence?",
+ o:["STORAGE","SERVICE","REPO"],a:1,
+ g:"a daemon by name, plus “still work after a reboot”.",
+ k:"SERVICE = install → <code>enable --now</code> → firewall <code>--permanent</code> → <code>--reload</code>."},
+
+{c:"Which sequence",q:"<em>Set the system to synchronise time from 192.168.56.1.</em><br>Which sequence?",
+ o:["NETWORK","SERVICE","SCHEDULE"],a:1,
+ g:"chronyd is a service you install, enable and point at a server.",
+ k:"Anything with a daemon behind it is SERVICE, even when it looks like networking."},
+
+{c:"Which sequence",q:"<em>Members of the admin group can read and write the directory; nobody else can access it.</em><br>Which sequence?",
+ o:["USERS","PERMISSIONS","STORAGE"],a:1,
+ g:"“can read and write” / “nobody else” describes access, not accounts.",
+ k:"Creating accounts is USERS. Controlling who can touch a file is PERMISSIONS."},
+
+{c:"Which sequence",q:"<em>You do not know the root password on node2. Set it to redhat.</em><br>Which sequence?",
+ o:["USERS","RECOVERY","PERMISSIONS"],a:1,
+ g:"“do not know the password” — you cannot log in at all.",
+ k:"RECOVERY = interrupt GRUB → get a shell → passwd → <code>/.autorelabel</code> → reboot."},
+
+/* --------------------------------------------------------- persistence */
+{c:"Survives reboot?",q:"Which of these is <em>gone</em> after a reboot?",
+ o:["a line added to <code>/etc/fstab</code>","<code>setenforce 1</code>","<code>useradd bob</code>"],a:1,
+ g:"nothing in the question — you have to know it.",
+ k:"<code>setenforce</code> only changes memory. To survive you must also set <code>SELINUX=enforcing</code> in <code>/etc/selinux/config</code>."},
+
+{c:"Survives reboot?",q:"You ran <code>systemctl start httpd</code>. The site works. You reboot. What happens?",
+ o:["It still works","It is stopped","It restarts after 5 minutes"],a:1,
+ g:"<code>start</code> vs <code>enable</code>.",
+ k:"<code>start</code> = now. <code>enable</code> = at every boot. <code>enable --now</code> = both."},
+
+{c:"Survives reboot?",q:"You ran <code>firewall-cmd --add-service=http</code> with no other flags. After a reboot the port is:",
+ o:["still open","closed again","open but only locally"],a:1,
+ g:"the missing <code>--permanent</code>.",
+ k:"<code>--permanent</code> writes it to disk but does not apply it now. You need <code>--permanent</code> AND <code>--reload</code>."},
+
+{c:"Survives reboot?",q:"You created a filesystem and mounted it by hand. Nothing was added to fstab. After a reboot:",
+ o:["it mounts automatically","the data is destroyed","the volume exists but is not mounted"],a:2,
+ g:"“nothing added to fstab”.",
+ k:"The data is fine — it just is not attached anywhere. The fstab line is what re-attaches it."},
+
+{c:"Survives reboot?",q:"Which makes a swap area come back after a reboot?",
+ o:["<code>mkswap</code>","<code>swapon /dev/sdb1</code>","the <code>/etc/fstab</code> entry"],a:2,
+ g:"“come back after a reboot”.",
+ k:"<code>mkswap</code> formats, <code>swapon</code> turns it on now, fstab is the only part that persists."},
+
+/* --------------------------------------------------------- reading the task */
+{c:"Read the task",q:"<em>Add 10.0.0.5/24 as a secondary address <b>without disturbing</b> existing settings.</em><br>What does that phrase tell you?",
+ o:["Do not reboot","Add to what is there, do not replace it","Use a second network card"],a:1,
+ g:"“without disturbing”.",
+ k:"It means append. In nmcli that is <code>+ipv4.addresses</code>. Without the <code>+</code> you wipe the first address."},
+
+{c:"Read the task",q:"<em>Resize the logical volume vo <b>and its filesystem</b> to 290M.</em><br>Which flag does the phrase point at?",
+ o:["<code>-r</code>","<code>-n</code>","<code>-s</code>"],a:0,
+ g:"“and its filesystem”.",
+ k:"<code>-r</code> resizes the filesystem along with the volume. Without it the volume grows and the filesystem does not — task failed."},
+
+{c:"Read the task",q:"<em>Create a logical volume of <b>50 extents</b>.</em><br>Which flag?",
+ o:["<code>-L 50</code>","<code>-l 50</code>","<code>-s 50</code>"],a:1,
+ g:"the word “extents” instead of a size like 1G.",
+ k:"lowercase <code>-l</code> = extents. Uppercase <code>-L</code> = megabytes. <code>-L 50</code> would give you 50MB."},
+
+{c:"Read the task",q:"<em>Files created in this directory must automatically belong to the admin group.</em><br>What is being asked for?",
+ o:["The sticky bit","The setgid bit","An ACL"],a:1,
+ g:"“files created … automatically belong to the group”.",
+ k:"setgid on a directory = new files inherit its group. Mode <code>2770</code>."},
+
+{c:"Read the task",q:"<em>Any user can create files, but users may only delete their own.</em><br>What is being asked for?",
+ o:["The sticky bit","The setgid bit","<code>chmod 777</code>"],a:0,
+ g:"“only delete their own”.",
+ k:"Sticky bit. Mode <code>1777</code> or <code>1770</code>. It stops users removing each other's files."},
+
+{c:"Read the task",q:"<em>The tar archive must use bzip2 compression.</em><br>Which flag?",
+ o:["<code>z</code>","<code>j</code>","<code>c</code>"],a:1,
+ g:"“bzip2” named explicitly.",
+ k:"<code>j</code> = bzip2, <code>z</code> = gzip. Using the wrong one fails the task even though a file gets made."},
+
+/* --------------------------------------------------------- diagnosis */
+{c:"Diagnose it",q:"The web page loads fine on the server itself but nobody else can reach it. Most likely cause?",
+ o:["The filesystem is not formatted","The firewall","The hostname is wrong"],a:1,
+ g:"“works locally but not remotely”.",
+ k:"If it works on the box, the service and files are fine. Only the firewall decides who gets in from outside."},
+
+{c:"Diagnose it",q:"Apache is running but every page returns <b>403 Forbidden</b>. Most likely cause?",
+ o:["Wrong SELinux context on the file","The firewall","httpd is not enabled"],a:0,
+ g:"403 = permission denied, not connection refused.",
+ k:"A file moved into <code>/var/www/html</code> keeps its old label. Fix with <code>restorecon -Rv /var/www/html</code>."},
+
+{c:"Diagnose it",q:"After a reboot the machine drops into emergency mode. Most likely cause?",
+ o:["SELinux is enforcing","A bad line in <code>/etc/fstab</code>","The firewall is running"],a:1,
+ g:"“after a reboot” + emergency mode.",
+ k:"Always run <code>mount -a</code> before rebooting. Silence means safe."},
+
+{c:"Diagnose it",q:"You reset the root password but now cannot log in at all. What was skipped?",
+ o:["<code>chroot /sysroot</code>","<code>touch /.autorelabel</code>","<code>systemctl enable sshd</code>"],a:1,
+ g:"nothing warns you — that is why it is the classic failure.",
+ k:"Without the relabel, SELinux contexts stay wrong and login is impossible."},
+
+{c:"Diagnose it",q:"A cron job never produces output. crond is running and the schedule is right. Likely cause?",
+ o:["The script is not executable","Cron does not support scripts","The clock is wrong"],a:0,
+ g:"“crond is running and the schedule is right” rules those out.",
+ k:"<code>chmod +x</code> the script. Cron will not run a file it cannot execute."},
+
+{c:"Diagnose it",q:"<code>mount -a</code> prints nothing at all. That means:",
+ o:["Nothing mounted, something is broken","Everything in fstab is fine","The command is unsupported"],a:1,
+ g:"silence.",
+ k:"No output = no errors = safe to reboot. Output = fix it now."},
+
+/* --------------------------------------------------------- concepts */
+{c:"Concepts",q:"In Linux, a brand new disk shows up as:",
+ o:["<code>D:\\</code>","A folder you choose","Automatically in <code>/home</code>"],a:1,
+ g:"Linux has no drive letters.",
+ k:"One tree starting at <code>/</code>. You pick a folder and the disk becomes that folder. That is mounting."},
+
+{c:"Concepts",q:"What is a volume group?",
+ o:["A pool of disk space you can hand out chunks from","A group of users","A folder with special permissions"],a:0,
+ g:"“group” of physical volumes.",
+ k:"Disks go into the pool (VG), you carve flexible chunks out of it (LVs), and you can resize them later."},
+
+{c:"Concepts",q:"Why use LVM instead of plain partitions?",
+ o:["It is faster","You can resize later without rebuilding","It uses less space"],a:1,
+ g:"nothing — this is the point of the whole feature.",
+ k:"A plain partition is fixed at creation. An LV can grow, and grow while mounted."},
+
+{c:"Concepts",q:"What does <code>mkfs</code> actually do?",
+ o:["Attaches the disk to a folder","Puts a filesystem on raw space so it can hold files","Makes the disk bigger"],a:1,
+ g:"“fs” = filesystem.",
+ k:"Format then mount. Raw space cannot hold files until it is formatted, and cannot be reached until it is mounted."},
+
+{c:"Concepts",q:"<code>-G</code> versus <code>-g</code> on useradd:",
+ o:["<code>-G</code> supplementary, <code>-g</code> primary","<code>-G</code> primary, <code>-g</code> supplementary","They are the same"],a:0,
+ g:"a task saying “additional group” or “secondary group”.",
+ k:"“Additional”/“secondary” always means <code>-G</code>."},
+
+{c:"Concepts",q:"Which filesystem <b>cannot</b> be shrunk?",
+ o:["ext4","xfs","Both can shrink"],a:1,
+ g:"a task asking you to reduce a volume.",
+ k:"xfs grows only. ext4 grows and shrinks. If a shrink task lands on xfs, check the filesystem first."},
+
+{c:"Concepts",q:"Where does <code>man</code> live during the exam?",
+ o:["On the exam console in Firefox","On the machine you are configuring","It is not available"],a:1,
+ g:"—",
+ k:"It is on the node, in the terminal. <code>man -k &lt;topic&gt;</code> searches descriptions when you do not know the command name."},
+
+{c:"Concepts",q:"You install a new kernel. Which command keeps the old one bootable?",
+ o:["<code>dnf update kernel</code>","<code>dnf install kernel</code>","Either — kernels are never removed"],a:1,
+ g:"“the original kernel must remain available”.",
+ k:"<code>install</code> adds alongside. Kernel is an install-only package, so both stay — but install is the safe habit."},
+
+/* --------------------------------------------------------- order matters */
+{c:"Order matters",q:"<em>Add users user2 and user3, whose additional group is admin.</em><br>What must happen first?",
+ o:["Set their passwords","<code>groupadd admin</code>","Nothing — useradd creates it"],a:1,
+ g:"a group named but never told to create.",
+ k:"<code>useradd -G admin</code> errors out if the group does not exist."},
+
+{c:"Order matters",q:"Correct order for adding swap?",
+ o:["<code>swapon -a</code> → mkswap → fstab","mkswap → fstab → <code>swapon -a</code>","fstab → <code>swapon -a</code> → mkswap"],a:1,
+ g:"—",
+ k:"Format, record it, then activate. <code>swapon -a</code> reads fstab, so the line has to exist first."},
+
+{c:"Order matters",q:"Shrinking an ext4 logical volume — what happens first?",
+ o:["Shrink the volume, then the filesystem","Shrink the filesystem, then the volume","Either order"],a:1,
+ g:"—",
+ k:"Filesystem first or you cut off data. <code>lvreduce -r</code> does both in the right order for you."},
+
+{c:"Order matters",q:"You need to install httpd but <code>dnf</code> says no repositories. What comes first?",
+ o:["Configure the repository","Reboot","Disable SELinux"],a:0,
+ g:"a repo task usually appears early for exactly this reason.",
+ k:"Every install task depends on the repo task. Do it first or nothing else works."},
+
+/* --------------------------------------------------------- traps */
+{c:"Traps",q:"<em>Reject traffic from 172.25.0.0/16. Existing services must keep working.</em><br>What should you NOT do?",
+ o:["Add a firewalld rich rule","<code>iptables -F</code> to start clean","Reload the firewall"],a:1,
+ g:"“existing services must keep working”.",
+ k:"<code>-F</code> flushes every rule, including work you were already graded on."},
+
+{c:"Traps",q:"<em>Find all files owned by harry and copy them.</em><br>Safest command?",
+ o:["<code>find / -user harry -exec cp {} dir/ \\;</code>","<code>find / -type f -user harry -exec cp -at dir/ {} +</code>","<code>cp -r /home/harry dir/</code>"],a:1,
+ g:"the word “files”.",
+ k:"<code>-type f</code> keeps you out of <code>/proc</code>, where cp can hang. And it copies files owned by harry anywhere, not just his home."},
+
+{c:"Traps",q:"You create <code>index.html</code> in <code>/root</code> then <code>mv</code> it into <code>/var/www/html</code>. Result?",
+ o:["Works fine","403 Forbidden","404 Not Found"],a:1,
+ g:"<code>mv</code> instead of creating it in place.",
+ k:"<code>mv</code> preserves the old SELinux label. Create it in place, or run <code>restorecon</code>."},
+
+{c:"Traps",q:"A timer unit is enabled but never fires. Most likely missing:",
+ o:["<code>[Install] WantedBy=timers.target</code>","A shebang","The firewall"],a:0,
+ g:"“enabled but never fires”.",
+ k:"Without an <code>[Install]</code> section, <code>enable</code> silently does nothing."},
+
+{c:"Traps",q:"<em>The file must not be executable by anyone.</em><br>Which mode?",
+ o:["<code>755</code>","<code>644</code>","<code>777</code>"],a:1,
+ g:"“not executable by anyone”.",
+ k:"No <code>x</code> bit anywhere. <code>644</code>. Any 7 or 5 in the mode means executable."},
+
+{c:"Traps",q:"Cron field order — 14:23 every day is written:",
+ o:["<code>14 23 * * *</code>","<code>23 14 * * *</code>","<code>* * 14 23 *</code>"],a:1,
+ g:"—",
+ k:"Minute comes first, then hour. Reversing it is one of the most common silent failures."},
+
+{c:"Traps",q:"A swap <b>file</b> goes into fstab referenced by:",
+ o:["UUID","Its path, e.g. <code>/swapfile</code>","Device name"],a:1,
+ g:"the word “file” instead of “partition”.",
+ k:"Files have no UUID. Also <code>chmod 600</code> it before <code>mkswap</code>."},
+];
+
+/* ------------------------------------------------------------------ app */
+const $=s=>document.querySelector(s);
+let cat="All", pool=[], cur=null, ok=0, tot=0, answered=false;
+
+const cats=["All",...new Set(BANK.map(b=>b.c))];
+$("#cats").innerHTML=cats.map(c=>`<button class="cat ${c===cat?'on':''}" data-c="${c}">${c}</button>`).join("");
+$("#cats").onclick=e=>{const b=e.target.closest(".cat");if(!b)return;
+  cat=b.dataset.c;[...document.querySelectorAll(".cat")].forEach(x=>x.classList.toggle("on",x.dataset.c===cat));
+  build();draw();};
+
+function build(){pool=BANK.filter(b=>cat==="All"||b.c===cat).slice().sort(()=>Math.random()-.5);}
+function draw(){
+  answered=false; $("#nextbar").classList.add("hidden");
+  if(!pool.length){
+    $("#card").innerHTML=`<div class="done"><h2>Round complete</h2><p>${ok} of ${tot} correct</p></div>`;
+    $("#nextbar").classList.remove("hidden"); $("#nextbtn").textContent="Start again";
+    cur=null; return;
+  }
+  cur=pool.pop();
+  $("#card").innerHTML=`
+    <span class="tag">${cur.c}</span>
+    <p class="q">${cur.q}</p>
+    <div id="opts">${cur.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")}</div>
+    <div class="expl" id="expl">
+      ${cur.g && cur.g!=="—" ? `<div class="give"><span class="lbl">DEAD GIVEAWAY</span><p>${cur.g}</p></div>`:""}
+      <div class="know"><span class="lbl">WHAT TO KNOW</span><p>${cur.k}</p></div>
+    </div>`;
+}
+$("#card").addEventListener("click",e=>{
+  const b=e.target.closest(".opt"); if(!b||answered)return;
+  answered=true; tot++;
+  const i=+b.dataset.i, right=i===cur.a;
+  if(right){ok++;}
+  [...document.querySelectorAll(".opt")].forEach((el,j)=>{
+    el.disabled=true;
+    if(j===cur.a) el.classList.add(right?"right":"reveal");
+    if(j===i && !right) el.classList.add("wrong");
+  });
+  $("#ok").textContent=ok; $("#tot").textContent=tot;
+  $("#expl").classList.add("on");
+  $("#nextbtn").textContent="Next question";
+  $("#nextbar").classList.remove("hidden");
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+});
+$("#nextbtn").onclick=()=>{ if(!cur&&!pool.length){build();ok=0;tot=0;$("#ok").textContent=0;$("#tot").textContent=0;} draw(); window.scrollTo({top:0,behavior:"smooth"}); };
+
+build(); draw();
+</script>
+</body>
+</html>
