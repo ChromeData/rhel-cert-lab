@@ -6,98 +6,126 @@
 <title>RHCSA Practice Exam</title>
 <style>
   :root{
-    --rh:#cc0000; --ink:#1a1a1a; --muted:#6a6e73; --paper:#fdfced; --line:#c9c4a8;
-    --sidebar:#151515; --ok:#2f7d32; --warn:#b8860b;
-    --mono:"Liberation Mono","DejaVu Sans Mono",Consolas,monospace;
-    --sans:"Liberation Sans","DejaVu Sans",Arial,Helvetica,sans-serif;
+    --rh:#cc0000; --bg:#050505; --panel:#0c0c0c; --paper:#0d0f0d; --line:#1e3a1e;
+    --ink:#c9d1c9; --dim:#6f7c6f; --green:#4af626; --green2:#2fbf1a; --amber:#ffb000;
+    --mono:"Liberation Mono","DejaVu Sans Mono",Consolas,"Courier New",monospace;
+    --sans:var(--mono);
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
-  body{font-family:var(--sans);background:#e8e8e0;color:var(--ink);font-size:14px}
+  body{font-family:var(--mono);background:var(--bg);color:var(--ink);font-size:13.5px;
+       background-image:repeating-linear-gradient(0deg,rgba(74,246,38,.020) 0 1px,transparent 1px 3px)}
 
-  .shell{display:grid;grid-template-columns:210px 1fr;height:100vh}
+  .shell{display:grid;grid-template-columns:230px 1fr;height:100vh}
 
   /* ---------------- left rail ---------------- */
-  aside{background:#fff;border-right:1px solid var(--line);padding:14px 12px;overflow-y:auto}
-  .hat{width:74px;height:50px;margin:2px auto 4px;display:block}
-  .brandline{text-align:center;font-weight:700;font-size:15px;line-height:1.25;margin-bottom:14px}
-  .timerbox{border:1px solid var(--line);background:#fdfced;padding:8px;text-align:center;margin-bottom:6px}
-  .timerbox .lbl{font-size:11px;color:#333}
-  .timerbox .val{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:.5px}
-  .timerbox.low .val{color:#c00}
-  .timerbox.over .val{color:#c00}
+  aside{background:var(--panel);border-right:1px solid var(--line);padding:14px 12px;overflow-y:auto}
+  .hat{width:78px;height:52px;margin:2px auto 4px;display:block;
+       filter:drop-shadow(0 0 6px rgba(204,0,0,.55))}
+  .brandline{text-align:center;font-weight:700;font-size:14px;line-height:1.3;margin-bottom:14px;
+             color:var(--green);letter-spacing:1px;text-shadow:0 0 8px rgba(74,246,38,.45)}
+  .timerbox{border:1px solid var(--line);background:#071007;padding:8px;text-align:center;margin-bottom:8px}
+  .timerbox .lbl{font-size:10.5px;color:var(--dim);letter-spacing:.5px}
+  .timerbox .val{font-size:22px;font-weight:700;letter-spacing:2px;color:var(--green);
+                 text-shadow:0 0 10px rgba(74,246,38,.6)}
+  .timerbox.low .val{color:#ff5555;text-shadow:0 0 10px rgba(255,60,60,.6);animation:blink 1.2s infinite}
+  .timerbox.over .val{color:#ff3333}
+  @keyframes blink{50%{opacity:.45}}
+
   .railbtn{display:block;width:100%;margin-top:6px;font:inherit;font-size:11.5px;
-           padding:6px 4px;border:1px solid var(--line);background:#f4f2e4;cursor:pointer;color:#0645ad}
-  .railbtn:hover{background:#ece9d6}
-  .railnote{font-size:10.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.4}
+           padding:7px 4px;border:1px solid var(--line);background:#0a140a;cursor:pointer;
+           color:var(--green);letter-spacing:.4px;transition:all .12s}
+  .railbtn:hover{background:#102010;border-color:var(--green2);box-shadow:0 0 8px rgba(74,246,38,.25)}
+  .railbtn:active{transform:translateY(1px)}
+  .railnote{font-size:10px;color:var(--dim);text-align:center;margin-top:10px;line-height:1.5}
+  .railnote code{color:var(--green2)}
 
   .levels{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
-  .levels h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
-  .levels a{display:block;font-size:11.5px;color:#0645ad;text-decoration:none;padding:2px 3px;border-radius:2px}
-  .levels a:hover{background:#f0eee0;text-decoration:underline}
-  .levels a.cur{background:#151515;color:#fff}
-  .levels a.done{color:var(--ok)}
-  .levels a.done::after{content:" ✓"}
-  .levels a.flag::after{content:" ⚑";color:var(--warn)}
+  .levels h4{margin:0 0 8px;font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim)}
+  .levels a{display:block;font-size:11.5px;color:var(--green2);text-decoration:none;padding:2px 4px}
+  .levels a:hover{background:#0f1b0f;color:var(--green);text-shadow:0 0 6px rgba(74,246,38,.5)}
+  .levels a.cur{background:var(--green);color:#000;font-weight:700}
+  .levels a.done{color:#2a7d1a}
+  .levels a.done::after{content:" [ok]"}
+  .levels a.flag::after{content:" [!]";color:var(--amber)}
 
   /* ---------------- paper ---------------- */
   main{overflow-y:auto;padding:16px 22px 60px}
   .paper{background:var(--paper);border:1px solid var(--line);max-width:1080px;margin:0 auto;
-         padding:22px 30px 34px;min-height:calc(100vh - 76px)}
-  .prepared{text-align:right;font-size:11.5px;color:#444;margin-bottom:6px}
-  h1{font-size:21px;margin:0 0 12px;font-weight:700}
-  .intro{font-size:12.5px;line-height:1.55;color:#222}
+         padding:22px 30px 34px;min-height:calc(100vh - 76px);
+         box-shadow:0 0 30px rgba(74,246,38,.05) inset}
+  .prepared{text-align:right;font-size:11px;color:var(--dim)}
+  h1{font-size:22px;margin:0 0 12px;font-weight:700;color:var(--green);letter-spacing:1px;
+     text-shadow:0 0 10px rgba(74,246,38,.35)}
+  .intro{font-size:12.5px;line-height:1.65;color:var(--ink)}
   .intro p{margin:0 0 8px}
-  .intro em{font-style:italic}
+  .intro strong{color:var(--green)}
+  .intro code{color:var(--amber)}
   hr.rule{border:0;border-top:1px solid var(--line);margin:14px 0}
-  h2.sec{font-size:15px;margin:16px 0 8px;font-weight:700}
-  .nodehdr{font-size:12.5px;margin:18px 0 8px}
-  .nodehdr code{font-family:var(--mono);font-size:12.5px}
+  h2.sec{font-size:14px;margin:16px 0 8px;font-weight:700;color:var(--green2);letter-spacing:.8px}
+  .nodehdr{font-size:12.5px;margin:20px 0 8px;color:var(--dim);border-left:2px solid var(--green2);
+           padding-left:8px}
+  .nodehdr code{color:var(--green);font-size:12.5px}
 
   table.tasks{border-collapse:collapse;width:100%}
-  table.tasks td{padding:3px 4px;vertical-align:middle;font-size:12.5px}
-  td.rd{width:150px;white-space:nowrap;color:#333;font-size:11.5px}
+  table.tasks td{padding:4px;vertical-align:middle;font-size:12.5px}
+  table.tasks tr:hover{background:#0a140a}
+  td.rd{width:150px;white-space:nowrap;color:var(--dim);font-size:11px}
   td.rd label{margin-right:12px;cursor:pointer}
-  td.rd input{margin:0 3px 0 0;vertical-align:middle}
-  a.task{color:#0645ad;text-decoration:underline;cursor:pointer}
-  tr.done a.task{color:var(--ok)}
-  tr.flag a.task{color:var(--warn)}
+  td.rd input{margin:0 3px 0 0;vertical-align:middle;accent-color:var(--green2)}
+  a.task{color:var(--green2);text-decoration:none;cursor:pointer;border-bottom:1px dotted var(--line)}
+  a.task:hover{color:var(--green);text-shadow:0 0 6px rgba(74,246,38,.5);border-bottom-color:var(--green)}
+  tr.done a.task{color:#2a7d1a;text-decoration:line-through}
+  tr.flag a.task{color:var(--amber)}
 
   /* ---------------- detail ---------------- */
   .detail{display:none}
   .detail.on{display:block}
-  .back{font-size:12px;color:#0645ad;cursor:pointer;text-decoration:underline}
-  .dtitle{font-size:18px;font-weight:700;margin:10px 0 2px}
-  .dnode{font-family:var(--mono);font-size:12px;background:#151515;color:#fff;
-         padding:2px 8px;display:inline-block;margin-bottom:12px}
-  .dbody{font-size:13.5px;line-height:1.6;max-width:760px}
-  .dbody code{font-family:var(--mono);background:#efedd9;border:1px solid #ddd9c0;padding:1px 4px}
-  .dbody ul{margin:6px 0 10px;padding-left:22px}
-  .dbody li{margin-bottom:4px}
-  .dnote{border-left:3px solid var(--warn);background:#fbf6df;padding:8px 12px;margin:12px 0;
-         font-size:12.5px;max-width:760px}
-  .dact{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
-  .dact button{font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid var(--line);
-               background:#f4f2e4;cursor:pointer}
-  .dact button:hover{background:#ece9d6}
-  .dact button.go{background:var(--rh);color:#fff;border-color:var(--rh);font-weight:600}
+  .back{font-size:12px;color:var(--green2);cursor:pointer}
+  .back:hover{color:var(--green)}
+  .dtitle{font-size:18px;font-weight:700;margin:10px 0 4px;color:var(--green);
+          text-shadow:0 0 10px rgba(74,246,38,.3)}
+  .dnode{font-size:11.5px;background:var(--green);color:#000;padding:2px 9px;
+         display:inline-block;margin-bottom:14px;font-weight:700;letter-spacing:1px}
+  .dbody{font-size:13.5px;line-height:1.75;max-width:780px}
+  .dbody code{color:var(--amber);background:#0a140a;border:1px solid var(--line);padding:1px 5px}
+  .dbody b{color:var(--green)}
+  .dbody ul{margin:8px 0 12px;padding-left:20px}
+  .dbody li{margin-bottom:5px}
+  .dbody li::marker{color:var(--green2)}
+  .dnote{border-left:3px solid var(--amber);background:#141005;padding:9px 13px;margin:14px 0;
+         font-size:12.5px;max-width:780px;color:#d8cba8}
+  .dnote code{color:var(--amber)}
+  .dact{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+  .dact button{font:inherit;font-size:12px;padding:7px 14px;border:1px solid var(--line);
+               background:#0a140a;color:var(--green2);cursor:pointer;letter-spacing:.4px}
+  .dact button:hover{background:#102010;color:var(--green);box-shadow:0 0 8px rgba(74,246,38,.2)}
+  .dact button.go{background:var(--green2);color:#000;border-color:var(--green2);font-weight:700}
+  .dact button.go:hover{background:var(--green);color:#000}
 
   /* ---------------- start ---------------- */
-  .ov{position:fixed;inset:0;background:rgba(20,20,20,.96);z-index:50;display:flex;
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:50;display:flex;
       align-items:center;justify-content:center;padding:20px}
-  .ov .card{background:#fdfced;max-width:620px;padding:28px 32px;border:1px solid var(--line)}
-  .ov h2{margin:0 0 4px;font-size:21px}
-  .ov p{font-size:13px;line-height:1.55}
-  .ov .row{display:flex;gap:14px;align-items:flex-end;margin:18px 0 4px;flex-wrap:wrap}
-  .ov label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;
-            color:var(--muted);font-weight:700;margin-bottom:4px}
-  .ov input,.ov select{font:inherit;padding:6px;border:1px solid var(--line);background:#fff}
-  .ov button{background:var(--rh);color:#fff;border:0;font:inherit;font-size:15px;font-weight:700;
-             padding:10px 24px;cursor:pointer;margin-top:14px}
+  .ov .card{background:var(--paper);max-width:640px;padding:28px 32px;border:1px solid var(--green2);
+            box-shadow:0 0 40px rgba(74,246,38,.12)}
+  .ov h2{margin:0 0 6px;font-size:20px;color:var(--green);letter-spacing:1px}
+  .ov p{font-size:12.5px;line-height:1.65;color:var(--ink)}
+  .ov code{color:var(--amber)}
+  .ov strong{color:var(--green)}
+  .ov .row{display:flex;gap:14px;align-items:flex-end;margin:20px 0 4px;flex-wrap:wrap}
+  .ov label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;
+            color:var(--dim);font-weight:700;margin-bottom:5px}
+  .ov input{font:inherit;padding:7px;border:1px solid var(--line);background:#071007;color:var(--green)}
+  .ov input:focus{outline:none;border-color:var(--green2);box-shadow:0 0 8px rgba(74,246,38,.25)}
+  .ov button{background:var(--green2);color:#000;border:0;font:inherit;font-size:14px;font-weight:700;
+             padding:11px 26px;cursor:pointer;margin-top:16px;letter-spacing:1px}
+  .ov button:hover{background:var(--green);box-shadow:0 0 14px rgba(74,246,38,.4)}
   .hidden{display:none!important}
-  .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#151515;
-         color:#fff;padding:9px 16px;font-size:12.5px;z-index:60;opacity:0;transition:opacity .2s}
+  .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0a140a;
+         color:var(--green);border:1px solid var(--green2);padding:9px 18px;font-size:12.5px;
+         z-index:60;opacity:0;transition:opacity .2s;box-shadow:0 0 16px rgba(74,246,38,.2)}
   .toast.on{opacity:1}
+
 </style>
 </head>
 <body>
@@ -644,7 +672,8 @@ $("#btnShuffle").onclick = ()=>{
 };
 async function launch(node){
   try{
-    const r = await fetch("/launch/"+node);
+    const base = location.protocol.startsWith("http") ? "" : "http://127.0.0.1:8899";
+    const r = await fetch(base+"/launch/"+node);
     const j = await r.json();
     toast(j.ok ? `Opened ${node} terminal` : `Failed: ${j.msg}`);
   }catch(err){
