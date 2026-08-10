@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>STUDY PLAN</title><style>
+  :root{--bg:#080a08;--card:#0f130f;--line:#1e3a1e;--ink:#d6e0d6;--dim:#7d8a7d;
+        --green:#4af626;--green2:#2fbf1a;--red:#ff4d4d;--amber:#ffb000;
+        --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:15px;
+       line-height:1.6;padding:env(safe-area-inset-top) 0 0}
+  .wrap{max-width:680px;margin:0 auto;padding:14px 16px 90px}
+  h1{font-size:19px;color:var(--green);letter-spacing:1px;margin:6px 0 4px}
+  h2{font-size:16px;color:var(--green);margin:26px 0 8px;padding-top:14px;
+     border-top:1px solid var(--line);letter-spacing:.5px}
+  h3{font-size:15px;color:var(--green2);margin:20px 0 6px}
+  p{margin:0 0 12px}
+  ul,ol{padding-left:22px;margin:0 0 12px}
+  li{margin-bottom:6px}
+  li::marker{color:var(--green2)}
+  code{color:var(--amber);background:#0c110c;border:1px solid var(--line);
+       padding:1px 5px;border-radius:3px;font-size:13.5px}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:6px;
+      padding:12px;overflow-x:auto;font-size:13px}
+  pre code{border:0;background:none;padding:0;color:var(--ink)}
+  strong{color:var(--green)}
+  em{color:var(--amber);font-style:normal}
+  blockquote{border-left:3px solid var(--green2);margin:14px 0;padding:8px 0 8px 14px;
+             background:#0c110c;color:var(--ink)}
+  blockquote p{margin:0}
+  hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+  table{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:13.5px;display:block;overflow-x:auto}
+  th{text-align:left;color:var(--dim);font-size:11px;letter-spacing:1px;
+     border-bottom:1px solid var(--line);padding:6px 8px;white-space:nowrap}
+  td{padding:7px 8px;border-bottom:1px solid #131a13;vertical-align:top}
+  .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0c110c;
+        border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+  .tabs a{flex:1;text-align:center;padding:15px 0;color:var(--dim);text-decoration:none;
+          font-size:12px;letter-spacing:1.5px;font-weight:700}
+  .tabs a.on{color:#000;background:var(--green2)}
+</style></head>
+<body><div class="wrap"><h1>STUDY PLAN</h1>
+
+
+<p>One path, in order. Each phase says what to do, how long, how many reps, and <strong>how you know you're done</strong>. Don't advance on time — advance on the gate.</p>
+
+<p><strong>Total: ~130 hours.</strong> RHCSA at hour 76, RHCE at hour 130.</p>
+
+<p>A "rep" = do the task start to finish, from a clean snapshot, without looking at notes.</p>
+
+<hr>
+
+<h2>How to use this</h2>
+
+<p>Every phase runs the same loop:</p>
+
+<ul><li>1. Read the sequence on <code>CARD.md</code></li>
+<li>2. Do a task from the exam page</li>
+<li>3. <code>check &lt;n&gt;</code> or <code>grade&lt;N&gt;.sh -v</code></li>
+<li>4. <strong>Reboot, verify again</strong></li>
+<li>5. Restore the snapshot, do it again with different values</li>
+</ul>
+<pre><code>
+&amp; &#x27;C:\Program Files\Oracle\VirtualBox\VBoxManage.exe&#x27; snapshot rhcsa-node1 restore clean-install
+</code></pre>
+
+<p>Two seconds, clean box, go again.</p>
+
+<hr>
+
+<p># PART 1 — RHCSA (76 hours)</p>
+
+<p>Ordered by <strong>leverage</strong>: what earns the most points and unlocks the most other tasks first.</p>
+
+<h3>Phase 0 — Orientation · 3 hours · no reps</h3>
+<p>Boot the lab. Log into both nodes. Learn <code>lsblk</code>, <code>df -h</code>, <code>systemctl status</code>, <code>man -k</code>. Read <code>CARD.md</code> once.</p>
+
+<p><strong>Gate:</strong> you can move around the filesystem and read a service's status without help.</p>
+
+<hr>
+
+<h3>Phase 1 — Storage · 14 hours · <strong>8 reps</strong> 🔴 highest leverage</h3>
+<p>Partitions, swap, LVM create, LVM extend, LVM shrink, fstab by UUID, VFAT/ext4/xfs.</p>
+
+<p>Why first: it's the biggest block of exam points, other tasks depend on disks existing, and a fstab mistake here can cost you the whole machine — you want that reflex early.</p>
+
+<p><strong>Gate:</strong> you can build a VG + LV + filesystem + fstab entry from memory, reboot, and it survives. Three times in a row. No notes.</p>
+
+<hr>
+
+<h3>Phase 2 — Services & firewall · 10 hours · <strong>6 reps</strong></h3>
+<p>httpd, vsftpd, nfs-server. <code>enable --now</code>. <code>firewall-cmd --permanent</code> + <code>--reload</code>. Test from node2, never from localhost.</p>
+
+<p>Why second: same four beats every time, and it's the other big point block.</p>
+
+<p><strong>Gate:</strong> you install, enable and open a service, then prove it from node2, in under 4 minutes.</p>
+
+<hr>
+
+<h3>Phase 3 — Users, groups, permissions · 8 hours · <strong>5 reps</strong></h3>
+<p>useradd/groupadd, supplementary vs primary, password aging, setgid, sticky, ACLs, sudo.</p>
+
+<p><strong>Gate:</strong> you can read "members of X can read and write, nobody else" and produce the right mode without thinking.</p>
+
+<hr>
+
+<h3>Phase 4 — SELinux · 7 hours · <strong>5 reps</strong></h3>
+<p>Enforcing at boot, file contexts, <code>restorecon</code>, port labels with <code>semanage</code>, booleans with <code>setsebool -P</code>.</p>
+
+<p>Why here: it silently breaks the services you just learned, so it lands better after Phase 2.</p>
+
+<p><strong>Gate:</strong> given a 403 on a web page, you find and fix the context in under 2 minutes.</p>
+
+<hr>
+
+<h3>Phase 5 — Boot, kernel, recovery · 8 hours · <strong>6 reps</strong> 🔴 gates half the real exam</h3>
+<p>Root password recovery on <strong>both</strong> RHEL 9 and RHEL 10 procedures. GRUB editing. <code>grubby</code>. Boot targets. fstab recovery from emergency mode.</p>
+
+<p>Why it matters this much: on the real exam the second machine's root password is not given to you. Fail this and every task on that machine is unreachable.</p>
+
+<p><strong>Gate:</strong> you recover a root password cold, both procedures, without notes. Then break fstab deliberately and recover from emergency mode.</p>
+
+<hr>
+
+<h3>Phase 6 — Networking · 6 hours · <strong>4 reps</strong></h3>
+<p><code>nmcli con mod</code>, secondary addresses, IPv6, hostname, <code>/etc/hosts</code>, DNS order.</p>
+
+<p><strong>Gate:</strong> static IP + gateway + DNS + hostname, persistent through a reboot, in 3 minutes.</p>
+
+<hr>
+
+<h3>Phase 7 — Scheduling, logs, time, tuning · 6 hours · <strong>4 reps</strong></h3>
+<p>cron, <code>at</code>, systemd timers, journald persistence, chrony, <code>tuned</code>.</p>
+
+<p><strong>Gate:</strong> you can write a cron line and a systemd timer for the same job and explain when you'd use each.</p>
+
+<hr>
+
+<h3>Phase 8 — Shell scripting · 8 hours · <strong>5 reps</strong></h3>
+<p><code>$1</code>, <code>if</code>/<code>test</code>, <code>for</code>, exit codes, reading command output.</p>
+
+<p><strong>Gate:</strong> you write a script that takes an argument, validates it, and exits with the right code — from a blank file, no template.</p>
+
+<hr>
+
+<h3>Phase 9 — Break/fix · 6 hours · <strong>10 faults</strong></h3>
+<pre><code>
+break-fix -l 3
+</code></pre>
+<p>No hints. Diagnose, fix, <code>--check</code>, reboot, <code>--check</code> again.</p>
+
+<p>Why here: it's the first phase that mixes everything, and it's the closest thing to the actual job.</p>
+
+<p><strong>Gate:</strong> 8 of 10 faults diagnosed without <code>--reveal</code>.</p>
+
+<hr>
+
+<h3>Phase 10 — Full timed exams · 8 hours · <strong>4 full runs</strong></h3>
+<p>34 tasks, 180 minutes, clean snapshot, no notes. Grade, reboot, grade again.</p>
+
+<p><strong>Gate: 3 consecutive runs above 85%.</strong> Not 70 — you want margin for exam nerves.</p>
+
+<blockquote><p>### ✅ RHCSA READY — hour 76</p></blockquote>
+
+<hr>
+
+<p># PART 2 — RHCE / EX294 (54 hours)</p>
+
+<p>All Ansible. Do not start until the RHCSA gate is passed — every playbook you write automates something from Part 1, so you need to know it by hand first.</p>
+
+<h3>Phase 11 — Ansible fundamentals · 10 hours · <strong>5 reps</strong></h3>
+<p>Install, <code>ansible.cfg</code>, inventory, ad-hoc commands, modules, idempotency.</p>
+
+<p><strong>Gate:</strong> you explain why running a playbook twice should report <code>changed=0</code>, and you can make a task that doesn't.</p>
+
+<hr>
+
+<h3>Phase 12 — Playbooks · 14 hours · <strong>8 reps</strong></h3>
+<p>Tasks, variables, facts, loops, conditionals, handlers, <code>register</code>, error handling.</p>
+
+<p>Rewrite Part 1 as playbooks: the storage task, the httpd task, the user task. Same outcome, written down instead of typed.</p>
+
+<p><strong>Gate:</strong> you convert any RHCSA task into a working idempotent playbook in under 10 minutes.</p>
+
+<hr>
+
+<h3>Phase 13 — Roles, templates, vault · 12 hours · <strong>6 reps</strong></h3>
+<p>Role structure, <code>ansible-galaxy init</code>, Jinja2 templates, <code>vault</code>, <code>when</code>/<code>tags</code>.</p>
+
+<p><strong>Gate:</strong> you build a role from scratch that configures a service on several hosts, with a templated config file and an encrypted variable.</p>
+
+<hr>
+
+<h3>Phase 14 — System roles & scale · 8 hours · <strong>4 reps</strong></h3>
+<p>RHEL system roles, multi-host plays, <code>delegate_to</code>, <code>serial</code>.</p>
+
+<p><strong>Gate:</strong> one playbook configures node1 and node2 differently based on group membership.</p>
+
+<hr>
+
+<h3>Phase 15 — Full timed EX294 runs · 10 hours · <strong>4 runs</strong></h3>
+<p><strong>Gate:</strong> 3 consecutive runs above 85%.</p>
+
+<blockquote><p>### ✅ RHCE READY — hour 130</p></blockquote>
+
+<hr>
+
+<p># Ranked by leverage — if you're short on time</p>
+
+<p>If you can only do part of this, do it in this order:</p>
+
+<table>
+<tr><th>Rank</th><th>Phase</th><th>Why</th></tr>
+<tr><td>1</td><td>Storage</td><td>Most points, most dependencies</td></tr>
+<tr><td>2</td><td>Root recovery</td><td>Gates half the real exam</td></tr>
+<tr><td>3</td><td>Services + firewall</td><td>Second-biggest point block</td></tr>
+<tr><td>4</td><td>Break/fix</td><td>Best interview material</td></tr>
+<tr><td>5</td><td>Users & permissions</td><td>Fast points, quick to learn</td></tr>
+<tr><td>6</td><td>SELinux</td><td>Silently breaks everything else</td></tr>
+<tr><td>7</td><td>Everything else</td><td></td></tr>
+</table>
+
+<hr>
+
+<p># The 24-hour version</p>
+
+<p>Not exam-ready. <strong>Interview-credible with one strong demo.</strong></p>
+
+<table>
+<tr><th>Hours</th><th>Do</th></tr>
+<tr><td>0–4</td><td>Storage, 5 reps</td></tr>
+<tr><td>4–8</td><td>Services + firewall, 5 reps</td></tr>
+<tr><td>8–14</td><td>Break/fix, 6 faults, no hints</td></tr>
+<tr><td>14–20</td><td>Record the demo video</td></tr>
+<tr><td>20–24</td><td>Interview talking points, said out loud</td></tr>
+</table>
+
+<p>The demo carries the interview, not recall. "Here's a broken system, watch me find it" beats any walkthrough.</p>
+
+<hr>
+
+<p># What "ready" means for each goal</p>
+
+<p><strong>Interview-ready</strong> — you can explain the <em>shape</em> of any task out loud, and demo a live diagnosis. You do not need flag-level recall. Roughly Phase 1–2 plus Phase 9.</p>
+
+<p><strong>Exam-ready</strong> — you can produce it cold, under a clock, with only <code>man</code>. That's the whole plan.</p>
+
+<p><strong>Job-ready</strong> — you look things up constantly and nobody minds. Closer to interview-ready than exam-ready, honestly.</p>
+
+</div><nav class="tabs">
+  <a href="index.html" class="">DRILL</a>
+  <a href="plan.html"  class="on">PLAN</a>
+  <a href="card.html"  class="">CARD</a>
+</nav></body></html>

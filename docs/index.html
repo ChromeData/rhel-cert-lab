@@ -64,6 +64,46 @@
   .done{text-align:center;padding:40px 10px}
   .done h2{color:var(--green);font-size:26px;margin:0 0 6px}
   .done p{color:var(--dim)}
+
+  :root{--bg:#080a08;--card:#0f130f;--line:#1e3a1e;--ink:#d6e0d6;--dim:#7d8a7d;
+        --green:#4af626;--green2:#2fbf1a;--red:#ff4d4d;--amber:#ffb000;
+        --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:15px;
+       line-height:1.6;padding:env(safe-area-inset-top) 0 0}
+  .wrap{max-width:680px;margin:0 auto;padding:14px 16px 90px}
+  h1{font-size:19px;color:var(--green);letter-spacing:1px;margin:6px 0 4px}
+  h2{font-size:16px;color:var(--green);margin:26px 0 8px;padding-top:14px;
+     border-top:1px solid var(--line);letter-spacing:.5px}
+  h3{font-size:15px;color:var(--green2);margin:20px 0 6px}
+  p{margin:0 0 12px}
+  ul,ol{padding-left:22px;margin:0 0 12px}
+  li{margin-bottom:6px}
+  li::marker{color:var(--green2)}
+  code{color:var(--amber);background:#0c110c;border:1px solid var(--line);
+       padding:1px 5px;border-radius:3px;font-size:13.5px}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:6px;
+      padding:12px;overflow-x:auto;font-size:13px}
+  pre code{border:0;background:none;padding:0;color:var(--ink)}
+  strong{color:var(--green)}
+  em{color:var(--amber);font-style:normal}
+  blockquote{border-left:3px solid var(--green2);margin:14px 0;padding:8px 0 8px 14px;
+             background:#0c110c;color:var(--ink)}
+  blockquote p{margin:0}
+  hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+  table{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:13.5px;display:block;overflow-x:auto}
+  th{text-align:left;color:var(--dim);font-size:11px;letter-spacing:1px;
+     border-bottom:1px solid var(--line);padding:6px 8px;white-space:nowrap}
+  td{padding:7px 8px;border-bottom:1px solid #131a13;vertical-align:top}
+  
+  .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0c110c;
+        border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:30}
+  .tabs a{flex:1;text-align:center;padding:15px 0;color:var(--dim);text-decoration:none;
+          font-size:12px;letter-spacing:1.5px;font-weight:700}
+  .tabs a.on{color:#000;background:var(--green2)}
+  .next{bottom:52px!important}
+  .wrap{padding-bottom:150px!important}
 </style>
 </head>
 <body>
@@ -346,5 +386,10 @@ $("#nextbtn").onclick=()=>{ if(!cur&&!pool.length){build();ok=0;tot=0;$("#ok").t
 
 build(); draw();
 </script>
+<nav class="tabs">
+  <a href="index.html" class="on">DRILL</a>
+  <a href="plan.html"  class="">PLAN</a>
+  <a href="card.html"  class="">CARD</a>
+</nav>
 </body>
 </html>

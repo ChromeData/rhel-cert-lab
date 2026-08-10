@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>REFERENCE CARD</title><style>
+  :root{--bg:#080a08;--card:#0f130f;--line:#1e3a1e;--ink:#d6e0d6;--dim:#7d8a7d;
+        --green:#4af626;--green2:#2fbf1a;--red:#ff4d4d;--amber:#ffb000;
+        --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:15px;
+       line-height:1.6;padding:env(safe-area-inset-top) 0 0}
+  .wrap{max-width:680px;margin:0 auto;padding:14px 16px 90px}
+  h1{font-size:19px;color:var(--green);letter-spacing:1px;margin:6px 0 4px}
+  h2{font-size:16px;color:var(--green);margin:26px 0 8px;padding-top:14px;
+     border-top:1px solid var(--line);letter-spacing:.5px}
+  h3{font-size:15px;color:var(--green2);margin:20px 0 6px}
+  p{margin:0 0 12px}
+  ul,ol{padding-left:22px;margin:0 0 12px}
+  li{margin-bottom:6px}
+  li::marker{color:var(--green2)}
+  code{color:var(--amber);background:#0c110c;border:1px solid var(--line);
+       padding:1px 5px;border-radius:3px;font-size:13.5px}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:6px;
+      padding:12px;overflow-x:auto;font-size:13px}
+  pre code{border:0;background:none;padding:0;color:var(--ink)}
+  strong{color:var(--green)}
+  em{color:var(--amber);font-style:normal}
+  blockquote{border-left:3px solid var(--green2);margin:14px 0;padding:8px 0 8px 14px;
+             background:#0c110c;color:var(--ink)}
+  blockquote p{margin:0}
+  hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+  table{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:13.5px;display:block;overflow-x:auto}
+  th{text-align:left;color:var(--dim);font-size:11px;letter-spacing:1px;
+     border-bottom:1px solid var(--line);padding:6px 8px;white-space:nowrap}
+  td{padding:7px 8px;border-bottom:1px solid #131a13;vertical-align:top}
+  .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0c110c;
+        border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+  .tabs a{flex:1;text-align:center;padding:15px 0;color:var(--dim);text-decoration:none;
+          font-size:12px;letter-spacing:1.5px;font-weight:700}
+  .tabs a.on{color:#000;background:var(--green2)}
+</style></head>
+<body><div class="wrap"><h1>REFERENCE CARD</h1>
+
+
+<h2>How to read any question</h2>
+
+<p><strong>1. Find the trigger word.</strong> It tells you which sequence. <strong>2. Run that sequence.</strong> Same steps every time. <strong>3. Circle the values.</strong> Everything else in the question is fill-in-the-blank.</p>
+
+<hr>
+
+<h2>Trigger word → sequence</h2>
+
+<table>
+<tr><th>If the question says…</th><th>Use</th></tr>
+<tr><td>volume, VG, LV, extents, swap, partition, filesystem, mount</td><td><strong>STORAGE</strong></td></tr>
+<tr><td>web server, FTP, NFS, "still running after reboot", "reachable from"</td><td><strong>SERVICE</strong></td></tr>
+<tr><td>user, group, shell, UID, password, aging</td><td><strong>USERS</strong></td></tr>
+<tr><td>IP address, hostname, gateway, DNS, IPv6</td><td><strong>NETWORK</strong></td></tr>
+<tr><td>SELinux, context, enforcing, boolean, port label, 403</td><td><strong>SELINUX</strong></td></tr>
+<tr><td>every day, at HH:MM, schedule, cron, timer</td><td><strong>SCHEDULE</strong></td></tr>
+<tr><td>don't know the root password, can't log in</td><td><strong>RECOVERY</strong></td></tr>
+<tr><td>repository, yum source, dnf source, install from</td><td><strong>REPO</strong></td></tr>
+<tr><td>kernel, default boot, boot parameter</td><td><strong>KERNEL</strong></td></tr>
+<tr><td>owner, permissions, read/write, ACL, only members of</td><td><strong>PERMISSIONS</strong></td></tr>
+</table>
+
+<hr>
+
+<h2>The 10 sequences</h2>
+
+<p><strong>STORAGE</strong> make it → format it → mount it → <strong>fstab it</strong> → <code>mount -a</code></p>
+
+<p><strong>SERVICE</strong> install → <code>enable --now</code> → firewall <code>--permanent</code> → <code>--reload</code></p>
+
+<p><strong>USERS</strong> group first → users → passwords</p>
+
+<p><strong>NETWORK</strong> <code>nmcli con mod</code> → <code>nmcli con up</code> → <code>hostnamectl</code></p>
+
+<p><strong>SELINUX</strong> edit <code>/etc/selinux/config</code> → <code>setenforce</code> → <code>restorecon</code> (or <code>semanage</code> for ports)</p>
+
+<p><strong>SCHEDULE</strong> enable the scheduler → write the job</p>
+
+<p><strong>RECOVERY</strong> interrupt GRUB → get a shell → <code>passwd</code> → <strong>autorelabel</strong> → reboot</p>
+
+<p><strong>REPO</strong> write the <code>.repo</code> file → <code>dnf repolist</code></p>
+
+<p><strong>KERNEL</strong> install (never update) → <code>grubby</code> → reboot</p>
+
+<p><strong>PERMISSIONS</strong> <code>chown</code> → <code>chmod</code> → <code>setfacl</code> if named users are involved</p>
+
+<hr>
+
+<h2>Then circle the values</h2>
+
+<p>Everything the question gives you is a blank to fill:</p>
+
+<blockquote><p>Create volume group <strong>vgapp</strong> with a <strong>8M</strong> physical extent size, logical volume</p></blockquote>
+<blockquote><p><strong>lvdata</strong> of <strong>1G</strong>, formatted <strong>xfs</strong>, mounted persistently at <strong>/srv/app</strong></p></blockquote>
+
+<p>Sequence: STORAGE. Blanks: name, extent size, name, size, filesystem, path. Nothing left to invent.</p>
+
+<hr>
+
+<h2>Two phrases that change the answer</h2>
+
+<p><strong>"persistently" / "after reboot" / "at boot"</strong> → it must be in a config file, not just running. This is where the points are.</p>
+
+<p><strong>"add" / "without disturbing" / "do not remove"</strong> → you are adding to something, not replacing it. There is usually a <code>+</code> or an append involved.</p>
+
+<hr>
+
+<h2>Every task ends the same way</h2>
+
+<pre><code>
+mount -a          (if you touched fstab — silence means safe)
+</code></pre>
+<p>verify it → reboot → verify it again</p>
+
+<p>If it passes before the reboot and fails after, it was never really done.</p>
+
+<hr>
+
+<h2>Where the flags come from</h2>
+
+<p>Not memory. <code>man &lt;command&gt;</code>, or <code>man -k &lt;topic&gt;</code> when you don't know the command's name.</p>
+
+<p>You memorize the <strong>sequence</strong>. You look up the <strong>flags</strong>. The question supplies the <strong>values</strong>.</p>
+
+</div><nav class="tabs">
+  <a href="index.html" class="">DRILL</a>
+  <a href="plan.html"  class="">PLAN</a>
+  <a href="card.html"  class="on">CARD</a>
+</nav></body></html>
