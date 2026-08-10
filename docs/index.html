@@ -116,6 +116,7 @@
   </header>
 
   <div class="catbar" id="cats"></div>
+  <p style="font-size:11px;color:var(--dim);margin:-4px 0 10px;letter-spacing:.3px">Levels match the PLAN tab. Drill the level you are on.</p>
   <div id="card"></div>
 </div>
 
@@ -126,223 +127,299 @@
    g the giveaway phrase in the question, k what you are meant to know. */
 const BANK = [
 /* ---------------------------------------------------------------- sequences */
-{c:"Which sequence",q:"<em>Add a 2G swap partition that activates automatically at boot.</em><br>Which sequence?",
+{c:"2 Storage",q:"<em>Add a 2G swap partition that activates automatically at boot.</em><br>Which sequence?",
  o:["SERVICE","STORAGE","KERNEL"],a:1,
  g:"“partition” and “swap” are storage words.",
  k:"STORAGE = make it → format it → mount it → fstab it → <code>mount -a</code>."},
 
-{c:"Which sequence",q:"<em>Configure vsftpd for anonymous download. It must still work after a reboot.</em><br>Which sequence?",
+{c:"3 Services",q:"<em>Configure vsftpd for anonymous download. It must still work after a reboot.</em><br>Which sequence?",
  o:["STORAGE","SERVICE","REPO"],a:1,
  g:"a daemon by name, plus “still work after a reboot”.",
  k:"SERVICE = install → <code>enable --now</code> → firewall <code>--permanent</code> → <code>--reload</code>."},
 
-{c:"Which sequence",q:"<em>Set the system to synchronise time from 192.168.56.1.</em><br>Which sequence?",
+{c:"8 Scheduling",q:"<em>Set the system to synchronise time from 192.168.56.1.</em><br>Which sequence?",
  o:["NETWORK","SERVICE","SCHEDULE"],a:1,
  g:"chronyd is a service you install, enable and point at a server.",
  k:"Anything with a daemon behind it is SERVICE, even when it looks like networking."},
 
-{c:"Which sequence",q:"<em>Members of the admin group can read and write the directory; nobody else can access it.</em><br>Which sequence?",
+{c:"4 Users",q:"<em>Members of the admin group can read and write the directory; nobody else can access it.</em><br>Which sequence?",
  o:["USERS","PERMISSIONS","STORAGE"],a:1,
  g:"“can read and write” / “nobody else” describes access, not accounts.",
  k:"Creating accounts is USERS. Controlling who can touch a file is PERMISSIONS."},
 
-{c:"Which sequence",q:"<em>You do not know the root password on node2. Set it to redhat.</em><br>Which sequence?",
+{c:"6 Boot",q:"<em>You do not know the root password on node2. Set it to redhat.</em><br>Which sequence?",
  o:["USERS","RECOVERY","PERMISSIONS"],a:1,
  g:"“do not know the password” — you cannot log in at all.",
  k:"RECOVERY = interrupt GRUB → get a shell → passwd → <code>/.autorelabel</code> → reboot."},
 
 /* --------------------------------------------------------- persistence */
-{c:"Survives reboot?",q:"Which of these is <em>gone</em> after a reboot?",
+{c:"5 SELinux",q:"Which of these is <em>gone</em> after a reboot?",
  o:["a line added to <code>/etc/fstab</code>","<code>setenforce 1</code>","<code>useradd bob</code>"],a:1,
  g:"nothing in the question — you have to know it.",
  k:"<code>setenforce</code> only changes memory. To survive you must also set <code>SELINUX=enforcing</code> in <code>/etc/selinux/config</code>."},
 
-{c:"Survives reboot?",q:"You ran <code>systemctl start httpd</code>. The site works. You reboot. What happens?",
+{c:"3 Services",q:"You ran <code>systemctl start httpd</code>. The site works. You reboot. What happens?",
  o:["It still works","It is stopped","It restarts after 5 minutes"],a:1,
  g:"<code>start</code> vs <code>enable</code>.",
  k:"<code>start</code> = now. <code>enable</code> = at every boot. <code>enable --now</code> = both."},
 
-{c:"Survives reboot?",q:"You ran <code>firewall-cmd --add-service=http</code> with no other flags. After a reboot the port is:",
+{c:"3 Services",q:"You ran <code>firewall-cmd --add-service=http</code> with no other flags. After a reboot the port is:",
  o:["still open","closed again","open but only locally"],a:1,
  g:"the missing <code>--permanent</code>.",
  k:"<code>--permanent</code> writes it to disk but does not apply it now. You need <code>--permanent</code> AND <code>--reload</code>."},
 
-{c:"Survives reboot?",q:"You created a filesystem and mounted it by hand. Nothing was added to fstab. After a reboot:",
+{c:"2 Storage",q:"You created a filesystem and mounted it by hand. Nothing was added to fstab. After a reboot:",
  o:["it mounts automatically","the data is destroyed","the volume exists but is not mounted"],a:2,
  g:"“nothing added to fstab”.",
  k:"The data is fine — it just is not attached anywhere. The fstab line is what re-attaches it."},
 
-{c:"Survives reboot?",q:"Which makes a swap area come back after a reboot?",
+{c:"2 Storage",q:"Which makes a swap area come back after a reboot?",
  o:["<code>mkswap</code>","<code>swapon /dev/sdb1</code>","the <code>/etc/fstab</code> entry"],a:2,
  g:"“come back after a reboot”.",
  k:"<code>mkswap</code> formats, <code>swapon</code> turns it on now, fstab is the only part that persists."},
 
 /* --------------------------------------------------------- reading the task */
-{c:"Read the task",q:"<em>Add 10.0.0.5/24 as a secondary address <b>without disturbing</b> existing settings.</em><br>What does that phrase tell you?",
+{c:"7 Network",q:"<em>Add 10.0.0.5/24 as a secondary address <b>without disturbing</b> existing settings.</em><br>What does that phrase tell you?",
  o:["Do not reboot","Add to what is there, do not replace it","Use a second network card"],a:1,
  g:"“without disturbing”.",
  k:"It means append. In nmcli that is <code>+ipv4.addresses</code>. Without the <code>+</code> you wipe the first address."},
 
-{c:"Read the task",q:"<em>Resize the logical volume vo <b>and its filesystem</b> to 290M.</em><br>Which flag does the phrase point at?",
+{c:"2 Storage",q:"<em>Resize the logical volume vo <b>and its filesystem</b> to 290M.</em><br>Which flag does the phrase point at?",
  o:["<code>-r</code>","<code>-n</code>","<code>-s</code>"],a:0,
  g:"“and its filesystem”.",
  k:"<code>-r</code> resizes the filesystem along with the volume. Without it the volume grows and the filesystem does not — task failed."},
 
-{c:"Read the task",q:"<em>Create a logical volume of <b>50 extents</b>.</em><br>Which flag?",
+{c:"2 Storage",q:"<em>Create a logical volume of <b>50 extents</b>.</em><br>Which flag?",
  o:["<code>-L 50</code>","<code>-l 50</code>","<code>-s 50</code>"],a:1,
  g:"the word “extents” instead of a size like 1G.",
  k:"lowercase <code>-l</code> = extents. Uppercase <code>-L</code> = megabytes. <code>-L 50</code> would give you 50MB."},
 
-{c:"Read the task",q:"<em>Files created in this directory must automatically belong to the admin group.</em><br>What is being asked for?",
+{c:"4 Users",q:"<em>Files created in this directory must automatically belong to the admin group.</em><br>What is being asked for?",
  o:["The sticky bit","The setgid bit","An ACL"],a:1,
  g:"“files created … automatically belong to the group”.",
  k:"setgid on a directory = new files inherit its group. Mode <code>2770</code>."},
 
-{c:"Read the task",q:"<em>Any user can create files, but users may only delete their own.</em><br>What is being asked for?",
+{c:"4 Users",q:"<em>Any user can create files, but users may only delete their own.</em><br>What is being asked for?",
  o:["The sticky bit","The setgid bit","<code>chmod 777</code>"],a:0,
  g:"“only delete their own”.",
  k:"Sticky bit. Mode <code>1777</code> or <code>1770</code>. It stops users removing each other's files."},
 
-{c:"Read the task",q:"<em>The tar archive must use bzip2 compression.</em><br>Which flag?",
+{c:"9 Scripting",q:"<em>The tar archive must use bzip2 compression.</em><br>Which flag?",
  o:["<code>z</code>","<code>j</code>","<code>c</code>"],a:1,
  g:"“bzip2” named explicitly.",
  k:"<code>j</code> = bzip2, <code>z</code> = gzip. Using the wrong one fails the task even though a file gets made."},
 
 /* --------------------------------------------------------- diagnosis */
-{c:"Diagnose it",q:"The web page loads fine on the server itself but nobody else can reach it. Most likely cause?",
+{c:"3 Services",q:"The web page loads fine on the server itself but nobody else can reach it. Most likely cause?",
  o:["The filesystem is not formatted","The firewall","The hostname is wrong"],a:1,
  g:"“works locally but not remotely”.",
  k:"If it works on the box, the service and files are fine. Only the firewall decides who gets in from outside."},
 
-{c:"Diagnose it",q:"Apache is running but every page returns <b>403 Forbidden</b>. Most likely cause?",
+{c:"5 SELinux",q:"Apache is running but every page returns <b>403 Forbidden</b>. Most likely cause?",
  o:["Wrong SELinux context on the file","The firewall","httpd is not enabled"],a:0,
  g:"403 = permission denied, not connection refused.",
  k:"A file moved into <code>/var/www/html</code> keeps its old label. Fix with <code>restorecon -Rv /var/www/html</code>."},
 
-{c:"Diagnose it",q:"After a reboot the machine drops into emergency mode. Most likely cause?",
+{c:"6 Boot",q:"After a reboot the machine drops into emergency mode. Most likely cause?",
  o:["SELinux is enforcing","A bad line in <code>/etc/fstab</code>","The firewall is running"],a:1,
  g:"“after a reboot” + emergency mode.",
  k:"Always run <code>mount -a</code> before rebooting. Silence means safe."},
 
-{c:"Diagnose it",q:"You reset the root password but now cannot log in at all. What was skipped?",
+{c:"6 Boot",q:"You reset the root password but now cannot log in at all. What was skipped?",
  o:["<code>chroot /sysroot</code>","<code>touch /.autorelabel</code>","<code>systemctl enable sshd</code>"],a:1,
  g:"nothing warns you — that is why it is the classic failure.",
  k:"Without the relabel, SELinux contexts stay wrong and login is impossible."},
 
-{c:"Diagnose it",q:"A cron job never produces output. crond is running and the schedule is right. Likely cause?",
+{c:"8 Scheduling",q:"A cron job never produces output. crond is running and the schedule is right. Likely cause?",
  o:["The script is not executable","Cron does not support scripts","The clock is wrong"],a:0,
  g:"“crond is running and the schedule is right” rules those out.",
  k:"<code>chmod +x</code> the script. Cron will not run a file it cannot execute."},
 
-{c:"Diagnose it",q:"<code>mount -a</code> prints nothing at all. That means:",
+{c:"2 Storage",q:"<code>mount -a</code> prints nothing at all. That means:",
  o:["Nothing mounted, something is broken","Everything in fstab is fine","The command is unsupported"],a:1,
  g:"silence.",
  k:"No output = no errors = safe to reboot. Output = fix it now."},
 
 /* --------------------------------------------------------- concepts */
-{c:"Concepts",q:"In Linux, a brand new disk shows up as:",
+{c:"2 Storage",q:"In Linux, a brand new disk shows up as:",
  o:["<code>D:\\</code>","A folder you choose","Automatically in <code>/home</code>"],a:1,
  g:"Linux has no drive letters.",
  k:"One tree starting at <code>/</code>. You pick a folder and the disk becomes that folder. That is mounting."},
 
-{c:"Concepts",q:"What is a volume group?",
+{c:"2 Storage",q:"What is a volume group?",
  o:["A pool of disk space you can hand out chunks from","A group of users","A folder with special permissions"],a:0,
  g:"“group” of physical volumes.",
  k:"Disks go into the pool (VG), you carve flexible chunks out of it (LVs), and you can resize them later."},
 
-{c:"Concepts",q:"Why use LVM instead of plain partitions?",
+{c:"2 Storage",q:"Why use LVM instead of plain partitions?",
  o:["It is faster","You can resize later without rebuilding","It uses less space"],a:1,
  g:"nothing — this is the point of the whole feature.",
  k:"A plain partition is fixed at creation. An LV can grow, and grow while mounted."},
 
-{c:"Concepts",q:"What does <code>mkfs</code> actually do?",
+{c:"2 Storage",q:"What does <code>mkfs</code> actually do?",
  o:["Attaches the disk to a folder","Puts a filesystem on raw space so it can hold files","Makes the disk bigger"],a:1,
  g:"“fs” = filesystem.",
  k:"Format then mount. Raw space cannot hold files until it is formatted, and cannot be reached until it is mounted."},
 
-{c:"Concepts",q:"<code>-G</code> versus <code>-g</code> on useradd:",
+{c:"4 Users",q:"<code>-G</code> versus <code>-g</code> on useradd:",
  o:["<code>-G</code> supplementary, <code>-g</code> primary","<code>-G</code> primary, <code>-g</code> supplementary","They are the same"],a:0,
  g:"a task saying “additional group” or “secondary group”.",
  k:"“Additional”/“secondary” always means <code>-G</code>."},
 
-{c:"Concepts",q:"Which filesystem <b>cannot</b> be shrunk?",
+{c:"2 Storage",q:"Which filesystem <b>cannot</b> be shrunk?",
  o:["ext4","xfs","Both can shrink"],a:1,
  g:"a task asking you to reduce a volume.",
  k:"xfs grows only. ext4 grows and shrinks. If a shrink task lands on xfs, check the filesystem first."},
 
-{c:"Concepts",q:"Where does <code>man</code> live during the exam?",
+{c:"1 Orientation",q:"Where does <code>man</code> live during the exam?",
  o:["On the exam console in Firefox","On the machine you are configuring","It is not available"],a:1,
  g:"—",
  k:"It is on the node, in the terminal. <code>man -k &lt;topic&gt;</code> searches descriptions when you do not know the command name."},
 
-{c:"Concepts",q:"You install a new kernel. Which command keeps the old one bootable?",
+{c:"6 Boot",q:"You install a new kernel. Which command keeps the old one bootable?",
  o:["<code>dnf update kernel</code>","<code>dnf install kernel</code>","Either — kernels are never removed"],a:1,
  g:"“the original kernel must remain available”.",
  k:"<code>install</code> adds alongside. Kernel is an install-only package, so both stay — but install is the safe habit."},
 
 /* --------------------------------------------------------- order matters */
-{c:"Order matters",q:"<em>Add users user2 and user3, whose additional group is admin.</em><br>What must happen first?",
+{c:"4 Users",q:"<em>Add users user2 and user3, whose additional group is admin.</em><br>What must happen first?",
  o:["Set their passwords","<code>groupadd admin</code>","Nothing — useradd creates it"],a:1,
  g:"a group named but never told to create.",
  k:"<code>useradd -G admin</code> errors out if the group does not exist."},
 
-{c:"Order matters",q:"Correct order for adding swap?",
+{c:"2 Storage",q:"Correct order for adding swap?",
  o:["<code>swapon -a</code> → mkswap → fstab","mkswap → fstab → <code>swapon -a</code>","fstab → <code>swapon -a</code> → mkswap"],a:1,
  g:"—",
  k:"Format, record it, then activate. <code>swapon -a</code> reads fstab, so the line has to exist first."},
 
-{c:"Order matters",q:"Shrinking an ext4 logical volume — what happens first?",
+{c:"2 Storage",q:"Shrinking an ext4 logical volume — what happens first?",
  o:["Shrink the volume, then the filesystem","Shrink the filesystem, then the volume","Either order"],a:1,
  g:"—",
  k:"Filesystem first or you cut off data. <code>lvreduce -r</code> does both in the right order for you."},
 
-{c:"Order matters",q:"You need to install httpd but <code>dnf</code> says no repositories. What comes first?",
+{c:"3 Services",q:"You need to install httpd but <code>dnf</code> says no repositories. What comes first?",
  o:["Configure the repository","Reboot","Disable SELinux"],a:0,
  g:"a repo task usually appears early for exactly this reason.",
  k:"Every install task depends on the repo task. Do it first or nothing else works."},
 
 /* --------------------------------------------------------- traps */
-{c:"Traps",q:"<em>Reject traffic from 172.25.0.0/16. Existing services must keep working.</em><br>What should you NOT do?",
+{c:"3 Services",q:"<em>Reject traffic from 172.25.0.0/16. Existing services must keep working.</em><br>What should you NOT do?",
  o:["Add a firewalld rich rule","<code>iptables -F</code> to start clean","Reload the firewall"],a:1,
  g:"“existing services must keep working”.",
  k:"<code>-F</code> flushes every rule, including work you were already graded on."},
 
-{c:"Traps",q:"<em>Find all files owned by harry and copy them.</em><br>Safest command?",
+{c:"9 Scripting",q:"<em>Find all files owned by harry and copy them.</em><br>Safest command?",
  o:["<code>find / -user harry -exec cp {} dir/ \\;</code>","<code>find / -type f -user harry -exec cp -at dir/ {} +</code>","<code>cp -r /home/harry dir/</code>"],a:1,
  g:"the word “files”.",
  k:"<code>-type f</code> keeps you out of <code>/proc</code>, where cp can hang. And it copies files owned by harry anywhere, not just his home."},
 
-{c:"Traps",q:"You create <code>index.html</code> in <code>/root</code> then <code>mv</code> it into <code>/var/www/html</code>. Result?",
+{c:"5 SELinux",q:"You create <code>index.html</code> in <code>/root</code> then <code>mv</code> it into <code>/var/www/html</code>. Result?",
  o:["Works fine","403 Forbidden","404 Not Found"],a:1,
  g:"<code>mv</code> instead of creating it in place.",
  k:"<code>mv</code> preserves the old SELinux label. Create it in place, or run <code>restorecon</code>."},
 
-{c:"Traps",q:"A timer unit is enabled but never fires. Most likely missing:",
+{c:"8 Scheduling",q:"A timer unit is enabled but never fires. Most likely missing:",
  o:["<code>[Install] WantedBy=timers.target</code>","A shebang","The firewall"],a:0,
  g:"“enabled but never fires”.",
  k:"Without an <code>[Install]</code> section, <code>enable</code> silently does nothing."},
 
-{c:"Traps",q:"<em>The file must not be executable by anyone.</em><br>Which mode?",
+{c:"4 Users",q:"<em>The file must not be executable by anyone.</em><br>Which mode?",
  o:["<code>755</code>","<code>644</code>","<code>777</code>"],a:1,
  g:"“not executable by anyone”.",
  k:"No <code>x</code> bit anywhere. <code>644</code>. Any 7 or 5 in the mode means executable."},
 
-{c:"Traps",q:"Cron field order — 14:23 every day is written:",
+{c:"8 Scheduling",q:"Cron field order — 14:23 every day is written:",
  o:["<code>14 23 * * *</code>","<code>23 14 * * *</code>","<code>* * 14 23 *</code>"],a:1,
  g:"—",
  k:"Minute comes first, then hour. Reversing it is one of the most common silent failures."},
 
-{c:"Traps",q:"A swap <b>file</b> goes into fstab referenced by:",
+{c:"2 Storage",q:"A swap <b>file</b> goes into fstab referenced by:",
  o:["UUID","Its path, e.g. <code>/swapfile</code>","Device name"],a:1,
  g:"the word “file” instead of “partition”.",
  k:"Files have no UUID. Also <code>chmod 600</code> it before <code>mkswap</code>."},
+
+/* ---------------------------------------------------- added: thin levels */
+{c:"7 Network",q:"Which one makes an IP address survive a reboot?",
+ o:["<code>ip addr add 192.168.56.101/24 dev enp0s8</code>","<code>nmcli con mod enp0s8 ipv4.addresses ...</code>","<code>ifconfig enp0s8 192.168.56.101</code>"],a:1,
+ g:"“survive a reboot”.",
+ k:"<code>ip addr add</code> and <code>ifconfig</code> only change memory. <code>nmcli con mod</code> writes the connection profile to disk."},
+
+{c:"7 Network",q:"You ran <code>nmcli con mod</code> and nothing changed. What did you forget?",
+ o:["<code>nmcli con up &lt;name&gt;</code>","A reboot","<code>systemctl restart network</code>"],a:0,
+ g:"the change is saved but not applied.",
+ k:"<code>mod</code> edits the saved profile. <code>up</code> activates it. Both, every time."},
+
+{c:"7 Network",q:"Where does a permanent hostname actually live?",
+ o:["<code>/etc/sysconfig/network</code>","<code>/etc/hostname</code>","<code>/etc/hosts</code>"],a:1,
+ g:"—",
+ k:"<code>hostnamectl set-hostname</code> writes <code>/etc/hostname</code>. <code>/etc/sysconfig/network</code> has been dead since RHEL 7."},
+
+{c:"7 Network",q:"Why should you not hand-edit <code>/etc/resolv.conf</code>?",
+ o:["It is read-only","NetworkManager overwrites it","It only affects root"],a:1,
+ g:"—",
+ k:"Set <code>ipv4.dns</code> on the connection instead, or your edit disappears on the next network change."},
+
+{c:"7 Network",q:"<em>Make node2.lab.local resolve to 192.168.56.102 without DNS.</em><br>Which file?",
+ o:["<code>/etc/hosts</code>","<code>/etc/resolv.conf</code>","<code>/etc/hostname</code>"],a:0,
+ g:"“without DNS”.",
+ k:"<code>/etc/hosts</code> is local name resolution. Multiple names for one IP go on the same line."},
+
+{c:"5 SELinux",q:"What does <code>restorecon</code> actually do?",
+ o:["Turns SELinux off","Resets a file's context to the default for its location","Restores a deleted file"],a:1,
+ g:"“con” = context.",
+ k:"It looks up what the label should be for that path and applies it. The fix after moving a file into a served directory."},
+
+{c:"5 SELinux",q:"A service needs to listen on a non-standard port with SELinux enforcing. Which tool?",
+ o:["<code>setsebool</code>","<code>semanage port</code>","<code>restorecon</code>"],a:1,
+ g:"“port”.",
+ k:"SELinux labels ports as well as files. <code>semanage port -a -t http_port_t -p tcp 8088</code>."},
+
+{c:"5 SELinux",q:"Which turns an SELinux boolean on <b>permanently</b>?",
+ o:["<code>setsebool httpd_can_network_connect on</code>","<code>setsebool -P httpd_can_network_connect on</code>","<code>getsebool -a</code>"],a:1,
+ g:"“permanently”.",
+ k:"Without <code>-P</code> it reverts at reboot. Same trap as <code>setenforce</code>."},
+
+{c:"9 Scripting",q:"In a shell script, what does <code>$1</code> refer to?",
+ o:["The script's own name","The first argument passed to it","The exit code of the last command"],a:1,
+ g:"—",
+ k:"<code>$0</code> is the script name, <code>$1</code> the first argument, <code>$#</code> how many there are."},
+
+{c:"9 Scripting",q:"A script should report failure. Which exit code?",
+ o:["<code>exit 0</code>","Any non-zero, e.g. <code>exit 1</code>","<code>exit -1</code> only"],a:1,
+ g:"—",
+ k:"0 means success, anything else means failure. That is how <code>&amp;&amp;</code> and <code>||</code> decide what to run."},
+
+{c:"9 Scripting",q:"Your script runs with <code>bash script.sh</code> but not as <code>./script.sh</code>. Why?",
+ o:["Missing execute bit","Wrong directory","Scripts must live in /usr/bin"],a:0,
+ g:"it works when you hand it to bash explicitly.",
+ k:"<code>chmod +x</code>. Same root cause as a cron job that silently never runs."},
+
+{c:"1 Orientation",q:"Which command shows disks, partitions and where they are mounted?",
+ o:["<code>df -h</code>","<code>lsblk</code>","<code>free -m</code>"],a:1,
+ g:"“disks and partitions”.",
+ k:"<code>lsblk</code> shows the block devices themselves. <code>df -h</code> shows mounted filesystems and free space. You will use both constantly."},
+
+{c:"1 Orientation",q:"You know what you want to do but not which command does it. Best move?",
+ o:["<code>man -k &lt;topic&gt;</code>","<code>man man</code>","Guess and check"],a:0,
+ g:"you do not know the command's name.",
+ k:"<code>man -k</code> (same as <code>apropos</code>) searches descriptions, not names. The single most useful lookup on exam day."},
+
+{c:"6 Boot",q:"Which shows the target the system boots into by default?",
+ o:["<code>systemctl get-default</code>","<code>runlevel</code>","<code>systemctl status</code>"],a:0,
+ g:"“by default”.",
+ k:"<code>get-default</code> reads it, <code>set-default</code> changes it. It is a symlink under <code>/etc/systemd/system</code>."},
+
+{c:"6 Boot",q:"You need a kernel boot parameter applied to every installed kernel. Which tool?",
+ o:["<code>grubby --update-kernel=ALL --args=...</code>","Edit <code>/boot/grub/grub.conf</code>","<code>systemctl set-default</code>"],a:0,
+ g:"“every installed kernel”.",
+ k:"<code>grubby</code> manages boot entries on RHEL 8+. <code>grub.conf</code> has not existed since RHEL 6."},
 ];
 
 /* ------------------------------------------------------------------ app */
 const $=s=>document.querySelector(s);
 let cat="All", pool=[], cur=null, ok=0, tot=0, answered=false;
 
-const cats=["All",...new Set(BANK.map(b=>b.c))];
+const cats=["All",...[...new Set(BANK.map(b=>b.c))].sort((a,b)=>parseInt(a)-parseInt(b))];
 $("#cats").innerHTML=cats.map(c=>`<button class="cat ${c===cat?'on':''}" data-c="${c}">${c}</button>`).join("");
 $("#cats").onclick=e=>{const b=e.target.closest(".cat");if(!b)return;
   cat=b.dataset.c;[...document.querySelectorAll(".cat")].forEach(x=>x.classList.toggle("on",x.dataset.c===cat));
