@@ -3,507 +3,670 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Red Hat Certified System Administrator — Practice Exam</title>
+<title>RHCSA Practice Exam</title>
 <style>
   :root{
-    --rh-red:#ee0000; --rh-dark:#151515; --ink:#151515; --muted:#6a6e73;
-    --line:#d2d2d2; --bg:#f0f0f0; --panel:#ffffff; --ok:#3e8635; --warn:#f0ab00;
+    --rh:#cc0000; --ink:#1a1a1a; --muted:#6a6e73; --paper:#fdfced; --line:#c9c4a8;
+    --sidebar:#151515; --ok:#2f7d32; --warn:#b8860b;
     --mono:"Liberation Mono","DejaVu Sans Mono",Consolas,monospace;
-    --sans:"Red Hat Text","Liberation Sans","DejaVu Sans",Arial,sans-serif;
+    --sans:"Liberation Sans","DejaVu Sans",Arial,Helvetica,sans-serif;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+  html,body{height:100%;margin:0}
+  body{font-family:var(--sans);background:#e8e8e0;color:var(--ink);font-size:14px}
 
-  /* ---------- top bar ---------- */
-  header{background:var(--rh-dark);color:#fff;display:flex;align-items:center;
-         padding:0 16px;height:56px;gap:16px;position:sticky;top:0;z-index:20}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
-  .brand .hat{width:26px;height:18px;background:var(--rh-red);
-               clip-path:polygon(0 100%,12% 62%,34% 44%,62% 40%,84% 26%,100% 40%,100% 100%);}
-  .brand small{display:block;font-weight:400;font-size:11px;color:#b8bbbe;letter-spacing:.4px}
-  header .spacer{flex:1}
-  .timer{font-family:var(--mono);font-size:22px;font-weight:700;padding:4px 12px;
-         border:1px solid #444;border-radius:3px;background:#0b0b0b;min-width:118px;text-align:center}
-  .timer.low{color:#ff8a8a;border-color:#a30000;animation:pulse 1.4s infinite}
-  .timer.over{color:#ff5555;border-color:#ee0000}
-  @keyframes pulse{50%{background:#2a0000}}
-  header button{font:inherit;font-size:13px;background:#3c3f42;color:#fff;border:1px solid #57595c;
-                padding:6px 12px;border-radius:3px;cursor:pointer}
-  header button:hover{background:#4d5155}
-  header button.primary{background:var(--rh-red);border-color:var(--rh-red);font-weight:600}
-  header button.primary:hover{background:#c00}
+  .shell{display:grid;grid-template-columns:210px 1fr;height:100vh}
 
-  /* ---------- layout ---------- */
-  .wrap{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 56px)}
-  nav{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto}
-  .examsel{padding:12px;border-bottom:1px solid var(--line);background:#fafafa}
-  .examsel label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
-                 color:var(--muted);margin-bottom:5px;font-weight:600}
-  .examsel select{width:100%;font:inherit;padding:6px;border:1px solid var(--line);border-radius:3px;background:#fff}
-  .tasklist{list-style:none;margin:0;padding:0}
-  .tasklist li{border-bottom:1px solid #eaeaea}
-  .tasklist button{width:100%;text-align:left;background:none;border:0;font:inherit;
-                   padding:10px 12px;cursor:pointer;display:flex;gap:9px;align-items:flex-start}
-  .tasklist button:hover{background:#f5f5f5}
-  .tasklist li.active button{background:#e7f1fa;box-shadow:inset 3px 0 0 #0066cc}
-  .tasklist .num{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:30px;padding-top:2px}
-  .tasklist .ttl{flex:1;font-size:13.5px}
-  .tasklist li.done .ttl{color:var(--muted);text-decoration:line-through}
-  .tasklist li.done .num::after{content:" ✓";color:var(--ok);font-weight:700}
-  .tasklist li.flag .num::after{content:" ⚑";color:var(--warn);font-weight:700}
+  /* ---------------- left rail ---------------- */
+  aside{background:#fff;border-right:1px solid var(--line);padding:14px 12px;overflow-y:auto}
+  .hat{width:74px;height:50px;margin:2px auto 4px;display:block}
+  .brandline{text-align:center;font-weight:700;font-size:15px;line-height:1.25;margin-bottom:14px}
+  .timerbox{border:1px solid var(--line);background:#fdfced;padding:8px;text-align:center;margin-bottom:6px}
+  .timerbox .lbl{font-size:11px;color:#333}
+  .timerbox .val{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:.5px}
+  .timerbox.low .val{color:#c00}
+  .timerbox.over .val{color:#c00}
+  .railbtn{display:block;width:100%;margin-top:6px;font:inherit;font-size:11.5px;
+           padding:6px 4px;border:1px solid var(--line);background:#f4f2e4;cursor:pointer;color:#0645ad}
+  .railbtn:hover{background:#ece9d6}
+  .railnote{font-size:10.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.4}
 
-  /* ---------- main ---------- */
-  main{overflow-y:auto;padding:28px 40px 80px}
-  .paper{background:var(--panel);border:1px solid var(--line);border-radius:3px;
-         max-width:860px;padding:28px 32px}
-  .crumbs{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
-  h1{font-size:23px;margin:0 0 4px;font-weight:600}
-  .node{display:inline-block;font-family:var(--mono);font-size:12.5px;background:#151515;color:#fff;
-        padding:3px 9px;border-radius:3px;margin:10px 0 18px}
-  .body{font-size:15.5px}
-  .body p{margin:0 0 12px}
-  .body ul{margin:0 0 12px;padding-left:22px}
-  .body li{margin-bottom:5px}
-  .body code,.body kbd{font-family:var(--mono);font-size:13.5px;background:#f5f5f5;
-                       border:1px solid #e0e0e0;border-radius:2px;padding:1px 5px}
-  .note{border-left:3px solid var(--warn);background:#fdf7e7;padding:10px 14px;margin:16px 0;font-size:14px}
-  .actions{display:flex;gap:10px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
-           align-items:center;flex-wrap:wrap}
-  .actions button{font:inherit;padding:8px 15px;border:1px solid var(--line);background:#fff;
-                  border-radius:3px;cursor:pointer;font-size:14px}
-  .actions button:hover{background:#f5f5f5}
-  .actions button.mark{border-color:var(--ok);color:var(--ok);font-weight:600}
-  .actions button.mark.on{background:var(--ok);color:#fff}
-  .actions button.flagbtn{border-color:var(--warn);color:#96690a;font-weight:600}
-  .actions button.flagbtn.on{background:var(--warn);color:#151515}
-  .actions .grow{flex:1}
+  .levels{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+  .levels h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .levels a{display:block;font-size:11.5px;color:#0645ad;text-decoration:none;padding:2px 3px;border-radius:2px}
+  .levels a:hover{background:#f0eee0;text-decoration:underline}
+  .levels a.cur{background:#151515;color:#fff}
+  .levels a.done{color:var(--ok)}
+  .levels a.done::after{content:" ✓"}
+  .levels a.flag::after{content:" ⚑";color:var(--warn)}
 
-  /* ---------- start screen ---------- */
-  .overlay{position:fixed;inset:0;background:rgba(21,21,21,.97);z-index:50;
-           display:flex;align-items:center;justify-content:center;padding:24px}
-  .overlay .card{background:#fff;border-radius:4px;max-width:640px;padding:34px 38px}
-  .overlay h2{margin:0 0 6px;font-size:24px}
-  .overlay .sub{color:var(--muted);margin-bottom:20px;font-size:14px}
-  .overlay ul{padding-left:20px;font-size:14.5px}
-  .overlay li{margin-bottom:7px}
-  .cfg{display:flex;gap:16px;align-items:flex-end;margin:22px 0 6px;flex-wrap:wrap}
-  .cfg label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
-             font-weight:600;display:block;margin-bottom:5px}
-  .cfg select,.cfg input{font:inherit;padding:7px;border:1px solid var(--line);border-radius:3px}
-  .overlay button.go{background:var(--rh-red);color:#fff;border:0;font:inherit;font-size:16px;
-                     font-weight:600;padding:11px 26px;border-radius:3px;cursor:pointer;margin-top:14px}
-  .overlay button.go:hover{background:#c00}
-  .hidden{display:none !important}
-  footer{position:fixed;bottom:0;left:300px;right:0;background:#fff;border-top:1px solid var(--line);
-         padding:7px 40px;font-size:12.5px;color:var(--muted);display:flex;gap:20px;align-items:center}
-  footer b{color:var(--ink)}
+  /* ---------------- paper ---------------- */
+  main{overflow-y:auto;padding:16px 22px 60px}
+  .paper{background:var(--paper);border:1px solid var(--line);max-width:1080px;margin:0 auto;
+         padding:22px 30px 34px;min-height:calc(100vh - 76px)}
+  .prepared{text-align:right;font-size:11.5px;color:#444;margin-bottom:6px}
+  h1{font-size:21px;margin:0 0 12px;font-weight:700}
+  .intro{font-size:12.5px;line-height:1.55;color:#222}
+  .intro p{margin:0 0 8px}
+  .intro em{font-style:italic}
+  hr.rule{border:0;border-top:1px solid var(--line);margin:14px 0}
+  h2.sec{font-size:15px;margin:16px 0 8px;font-weight:700}
+  .nodehdr{font-size:12.5px;margin:18px 0 8px}
+  .nodehdr code{font-family:var(--mono);font-size:12.5px}
+
+  table.tasks{border-collapse:collapse;width:100%}
+  table.tasks td{padding:3px 4px;vertical-align:middle;font-size:12.5px}
+  td.rd{width:150px;white-space:nowrap;color:#333;font-size:11.5px}
+  td.rd label{margin-right:12px;cursor:pointer}
+  td.rd input{margin:0 3px 0 0;vertical-align:middle}
+  a.task{color:#0645ad;text-decoration:underline;cursor:pointer}
+  tr.done a.task{color:var(--ok)}
+  tr.flag a.task{color:var(--warn)}
+
+  /* ---------------- detail ---------------- */
+  .detail{display:none}
+  .detail.on{display:block}
+  .back{font-size:12px;color:#0645ad;cursor:pointer;text-decoration:underline}
+  .dtitle{font-size:18px;font-weight:700;margin:10px 0 2px}
+  .dnode{font-family:var(--mono);font-size:12px;background:#151515;color:#fff;
+         padding:2px 8px;display:inline-block;margin-bottom:12px}
+  .dbody{font-size:13.5px;line-height:1.6;max-width:760px}
+  .dbody code{font-family:var(--mono);background:#efedd9;border:1px solid #ddd9c0;padding:1px 4px}
+  .dbody ul{margin:6px 0 10px;padding-left:22px}
+  .dbody li{margin-bottom:4px}
+  .dnote{border-left:3px solid var(--warn);background:#fbf6df;padding:8px 12px;margin:12px 0;
+         font-size:12.5px;max-width:760px}
+  .dact{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+  .dact button{font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid var(--line);
+               background:#f4f2e4;cursor:pointer}
+  .dact button:hover{background:#ece9d6}
+  .dact button.go{background:var(--rh);color:#fff;border-color:var(--rh);font-weight:600}
+
+  /* ---------------- start ---------------- */
+  .ov{position:fixed;inset:0;background:rgba(20,20,20,.96);z-index:50;display:flex;
+      align-items:center;justify-content:center;padding:20px}
+  .ov .card{background:#fdfced;max-width:620px;padding:28px 32px;border:1px solid var(--line)}
+  .ov h2{margin:0 0 4px;font-size:21px}
+  .ov p{font-size:13px;line-height:1.55}
+  .ov .row{display:flex;gap:14px;align-items:flex-end;margin:18px 0 4px;flex-wrap:wrap}
+  .ov label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;
+            color:var(--muted);font-weight:700;margin-bottom:4px}
+  .ov input,.ov select{font:inherit;padding:6px;border:1px solid var(--line);background:#fff}
+  .ov button{background:var(--rh);color:#fff;border:0;font:inherit;font-size:15px;font-weight:700;
+             padding:10px 24px;cursor:pointer;margin-top:14px}
+  .hidden{display:none!important}
+  .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#151515;
+         color:#fff;padding:9px 16px;font-size:12.5px;z-index:60;opacity:0;transition:opacity .2s}
+  .toast.on{opacity:1}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="brand"><div class="hat"></div>
-    <div>Red Hat Certified System Administrator<small>PRACTICE EXAM — EX200 FORMAT</small></div>
-  </div>
-  <div class="spacer"></div>
-  <button id="btnPause">Pause</button>
-  <button id="btnRestart">Restart</button>
-  <div class="timer" id="timer">--:--:--</div>
-</header>
+<div class="shell">
+  <aside>
+    <svg class="hat" viewBox="0 0 120 80" aria-label="Red Hat">
+      <ellipse cx="60" cy="62" rx="52" ry="12" fill="#cc0000"/>
+      <path d="M18 60 C18 34 34 20 60 20 C86 20 102 34 102 60 Z" fill="#cc0000"/>
+      <path d="M30 58 C30 40 42 30 60 30 C78 30 90 40 90 58 Z" fill="#1a1a1a" opacity=".18"/>
+    </svg>
+    <div class="brandline">Red Hat<br>Practice Exam</div>
 
-<div class="wrap">
-  <nav>
-    <div class="examsel">
-      <label for="examPick">Exam</label>
-      <select id="examPick"></select>
+    <div class="timerbox" id="timerbox">
+      <div class="lbl">Time remaining:</div>
+      <div class="val" id="timer">--:--</div>
     </div>
-    <ul class="tasklist" id="tasklist"></ul>
-  </nav>
+    <button class="railbtn" id="btnPause">Pause</button>
+    <button class="railbtn" id="btnShuffle">New random exam</button>
+    <button class="railbtn" id="btnT1">Open node1 terminal</button>
+    <button class="railbtn" id="btnT2">Open node2 terminal</button>
+    <div class="railnote">Terminals need <code>serve.py</code> running.</div>
+
+    <div class="levels">
+      <h4>Tasks</h4>
+      <div id="levelList"></div>
+    </div>
+  </aside>
+
   <main>
-    <div class="paper" id="paper"></div>
+    <div class="paper">
+      <!-- ---------- overview ---------- -->
+      <div id="overview">
+        <div class="prepared" id="prepared">RHCSA practice exam</div>
+        <h1>RHCSA Exam</h1>
+        <div class="intro">
+          <p><strong>Please review</strong> the <em>Important Configuration Information</em>
+             section below before you begin.</p>
+          <p>Perform the tasks listed below. You may want to read the entire list before you
+             start — some tasks depend on others. These items are reported as a single score.
+             You must score <strong>210 points or higher, out of 300</strong>.</p>
+          <p>Every configuration must survive a reboot with no manual intervention. A service
+             that is running but not enabled scores zero.</p>
+        </div>
+
+        <hr class="rule">
+        <h2 class="sec">Configuration Information</h2>
+        <div class="intro">
+          <p>Root password on both systems: <code>Rhcsa!2026</code>.
+             <code>man</code>, <code>--help</code> and <code>/usr/share/doc</code> are
+             permitted. Nothing else is.</p>
+        </div>
+
+        <div id="taskGroups"></div>
+      </div>
+
+      <!-- ---------- one task ---------- -->
+      <div class="detail" id="detail">
+        <span class="back" id="back">&larr; Back to task list</span>
+        <div class="dtitle" id="dTitle"></div>
+        <div class="dnode" id="dNode"></div>
+        <div class="dbody" id="dBody"></div>
+        <div id="dNote"></div>
+        <div class="dact">
+          <button id="prev">&larr; Previous</button>
+          <button id="next">Next &rarr;</button>
+          <button id="mDone" class="go">Mark Done</button>
+          <button id="mFlag">Flag for revisit</button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
-<footer>
-  <span>Completed: <b id="statDone">0</b></span>
-  <span>Flagged: <b id="statFlag">0</b></span>
-  <span>Pass mark: <b>70%</b> (Red Hat: 210/300)</span>
-  <span style="margin-left:auto">Grade with <b>bash /root/grade&lt;N&gt;.sh -v</b> on node1</span>
-</footer>
+<div class="toast" id="toast"></div>
 
-<div class="overlay" id="startScreen">
+<div class="ov" id="start">
   <div class="card">
-    <h2>Practice Exam — EX200 format</h2>
-    <div class="sub">Performance-based. No multiple choice. Either the system works at the end or it doesn't.</div>
-    <ul>
-      <li>All work is done on the systems <b>node1</b> and <b>node2</b>, not on this console.</li>
-      <li><b>Every configuration must survive a reboot.</b> A service that is running but not enabled scores zero.</li>
-      <li><code>man</code>, <code>--help</code> and <code>/usr/share/doc</code> are permitted. Nothing else is.</li>
-      <li>Root password on both systems: <code>Rhcsa!2026</code></li>
-      <li>When time is up, run the grader on node1 — then <b>reboot and grade again</b>.</li>
-    </ul>
-    <div class="cfg">
-      <div><label for="examStart">Exam set</label><select id="examStart"></select></div>
-      <div><label for="mins">Time limit (minutes)</label><input id="mins" type="number" value="180" min="15" max="360" style="width:110px"></div>
+    <h2>RHCSA Practice Exam</h2>
+    <p>Performance-based. Every task is generated fresh with different values, so you cannot
+       memorise answers — only the method.</p>
+    <p>Work is done on <strong>node1</strong> and <strong>node2</strong>, not in this browser.
+       Grade yourself afterwards with <code>bash /root/grade1.sh -v</code>, then reboot and
+       grade again.</p>
+    <div class="row">
+      <div><label for="nTasks">Tasks</label>
+        <input id="nTasks" type="number" value="34" min="5" max="60" style="width:80px"></div>
+      <div><label for="mins">Minutes</label>
+        <input id="mins" type="number" value="180" min="15" max="360" style="width:90px"></div>
+      <div><label for="who">Name on paper</label>
+        <input id="who" type="text" value="" placeholder="your name" style="width:170px"></div>
     </div>
-    <button class="go" id="btnStart">Begin Exam</button>
+    <button id="begin">Begin Exam</button>
   </div>
 </div>
 
 <script>
-/* Exam task data. Wording kept terse and imperative to match EX200 style.
-   Answers deliberately absent - this is the exam paper, not the study guide. */
-const EXAMS = [
-{
-  name: "Practice Exam 1 — Core",
-  tasks: [
-    {id:"T01", node:"node1", title:"Configure networking",
-     body:"<p>Configure the host-only network interface with the following static values:</p><ul>"+
-          "<li>IPv4 address <code>192.168.56.101/24</code></li><li>Default gateway <code>192.168.56.1</code></li>"+
-          "<li>DNS server <code>192.168.56.1</code></li><li>Static hostname <code>node1.domain40.example.com</code></li></ul>"+
-          "<p>Additionally, add <code>10.0.0.5/24</code> as a <b>secondary</b> address on the same connection. "+
-          "Do this in a way that does not disturb the settings above.</p>"},
-    {id:"T02", node:"node1", title:"Create users and groups",
-     body:"<p>Create the users <code>harry</code>, <code>natasha</code> and <code>tom</code>.</p><ul>"+
-          "<li><code>harry</code> and <code>natasha</code> must have <code>admin</code> as a supplementary group.</li>"+
-          "<li><code>tom</code> must have a non-interactive login shell.</li></ul>"},
-    {id:"T03", node:"node1", title:"Create a user with a fixed UID",
-     body:"<p>Create the user <code>alex</code> with UID <code>1234</code> and the password <code>alex111</code>.</p>"},
-    {id:"T04", node:"node1", title:"Collaborative directory",
-     body:"<p>Create the directory <code>/home/admins</code>, group-owned by <code>admin</code>, such that:</p><ul>"+
-          "<li>Members of <code>admin</code> can read and write.</li><li>All other users have no access whatsoever.</li>"+
-          "<li>Files created inside automatically belong to the <code>admin</code> group.</li></ul>"},
-    {id:"T05", node:"node1", title:"Schedule a recurring task",
-     body:"<p>Schedule <code>/bin/echo hello</code> to run at <b>14:23 every day</b>, as root.</p>"},
-    {id:"T06", node:"node1", title:"Find and collect files",
-     body:"<p>Find all <b>regular files</b> owned by <code>harry</code> anywhere on the system and copy them "+
-          "to <code>/opt/dir</code>, preserving ownership and permissions.</p>"},
-    {id:"T07", node:"node1", title:"Filter file contents",
-     body:"<p>Write every line of <code>/etc/testfile</code> that contains the string <code>abcde</code> "+
-          "to <code>/tmp/testfile</code>, preserving the original order.</p>"},
-    {id:"T08", node:"node1", title:"Add swap space",
-     body:"<p>Add a <b>2 GiB</b> swap partition that activates automatically at boot. The existing swap must "+
-          "remain in place and active. Use one of the spare disks.</p><p>Reference it in <code>/etc/fstab</code> "+
-          "by <b>UUID</b>, not by device name.</p>",
-     note:"Spare disks on this system are <code>/dev/sdb</code> and <code>/dev/sdc</code>. Verify with <code>lsblk</code>."},
-    {id:"T09", node:"node1", title:"Configure a web server",
-     body:"<p>Install and configure Apache so that it serves a page containing the string <code>RHCSA-OK</code> "+
-          "at <code>http://192.168.56.101/</code>.</p><p>It must be reachable <b>from node2</b> and must still "+
-          "work after a reboot.</p>"},
-    {id:"T10", node:"node1", title:"Configure an FTP server",
-     body:"<p>Install and configure <code>vsftpd</code> to permit <b>anonymous download</b> from "+
-          "<code>/var/ftp/pub</code>.</p><p>Place a file named <code>README</code> in that directory. It must be "+
-          "retrievable from node2 and survive a reboot.</p>"},
-    {id:"T11", node:"node1", title:"Restrict network access",
-     body:"<p>Reject all traffic originating from the network <code>172.25.0.0/16</code>. All existing services "+
-          "must continue to work.</p><p>Do this without discarding your other firewall configuration.</p>"},
-    {id:"T12", node:"node1", title:"Set the default kernel",
-     body:"<p>Ensure the <b>newest installed kernel</b> is the default boot target, without removing the previous kernel.</p>"},
-    {id:"T13", node:"node1", title:"Configure a software repository",
-     body:"<p>Configure a <code>dnf</code> repository named <code>local</code> that uses the attached installation "+
-          "media, with GPG checking disabled. Mount the media under <code>/mnt</code>.</p>"+
-          "<p>It must be usable by <code>dnf</code> and must persist across reboots.</p>"},
-    {id:"T14", node:"node1", title:"SELinux mode and contexts",
-     body:"<p>SELinux must be in <b>enforcing</b> mode at boot.</p><p>The file served by Apache in the web server "+
-          "task must carry the correct SELinux type for web content.</p>"},
-    {id:"T15", node:"node1", title:"Create logical volumes",
-     body:"<p>Using a spare disk, create:</p><ul><li>Volume group <code>vgdata</code> with an <b>8 MiB</b> physical extent size</li>"+
-          "<li>Logical volume <code>lvdata</code> of <b>512 MiB</b>, formatted <code>xfs</code></li>"+
-          "<li>Mounted persistently at <code>/data</code></li></ul>"}
-  ]
-},
-{
-  name: "Practice Exam 2 — Services & Scripting",
-  tasks: [
-    {id:"T16", node:"node1", title:"Recover the root password",
-     body:"<p>Reboot the system and gain root access <b>without</b> knowing the current password. "+
-          "Set the root password to <code>Rhcsa!2026</code>.</p>",
-     note:"This is the single most commonly failed RHCSA task. Practise it until it is automatic."},
-    {id:"T17", node:"node1", title:"Shell script: argument handling",
-     body:"<p>Write <code>/usr/local/bin/reportuser</code> so that:</p><ul>"+
-          "<li>With <b>no</b> argument it prints <code>Usage: reportuser &lt;username&gt;</code> and exits <code>1</code></li>"+
-          "<li>With an <b>existing</b> username it prints that user's UID, primary group and shell</li>"+
-          "<li>With a <b>non-existent</b> username it prints <code>no such user: &lt;name&gt;</code> and exits <code>2</code></li></ul>"+
-          "<p>It must be executable by everyone.</p>"},
-    {id:"T18", node:"node1", title:"Shell script: loops",
-     body:"<p>Write <code>/usr/local/bin/sizes</code> which takes one directory as an argument and, for every "+
-          "<b>regular file</b> directly inside it, prints <code>&lt;filename&gt; &lt;size-in-bytes&gt;</code> — one per "+
-          "line, sorted largest first.</p><p>If the argument is not a directory, exit <code>1</code> with an error on stderr.</p>"},
-    {id:"T19", node:"node1", title:"Access control lists",
-     body:"<p>Create <code>/srv/shared/report.txt</code> owned by <code>root</code>, group <code>admin</code>, such that:</p><ul>"+
-          "<li><code>harry</code> has <b>read-write</b> access via ACL, regardless of group membership</li>"+
-          "<li><code>tom</code> has <b>no access at all</b> via ACL</li>"+
-          "<li>Everyone else has read-only access</li></ul><p>The ACLs must survive a reboot.</p>"},
-    {id:"T20", node:"node1", title:"Export an NFS share",
-     body:"<p>Export <code>/srv/nfsshare</code> read-write, restricted to the network "+
-          "<code>192.168.56.0/24</code> only. Create a file inside it.</p>"},
-    {id:"T21", node:"node2", title:"Mount an NFS share",
-     body:"<p>On <b>node2</b>, mount node1's <code>/srv/nfsshare</code> at <code>/mnt/remote</code> persistently. "+
-          "Verify you can read the file created in the previous task.</p>"},
-    {id:"T22", node:"node2", title:"Configure autofs",
-     body:"<p>On <b>node2</b>, configure <code>autofs</code> so that <code>/net/shared</code> automatically mounts "+
-          "node1's <code>/srv/nfsshare</code> on access and unmounts when idle.</p>",
-     note:"Disable the persistent mount from the previous task first — they will conflict."},
-    {id:"T23", node:"node1", title:"Log analysis and journal persistence",
-     body:"<p>Find every failed SSH login attempt since the last boot and write those lines to "+
-          "<code>/root/failed-logins.txt</code>.</p><p>Then make the system journal <b>persistent</b> across reboots.</p>"},
-    {id:"T24", node:"node1", title:"Time services",
-     body:"<p>Configure the system to synchronise time from <code>192.168.56.1</code>, set the timezone to "+
-          "<code>America/New_York</code>, and confirm NTP synchronisation is enabled.</p>"},
-    {id:"T25", node:"node1", title:"Tuning profiles",
-     body:"<p>Set the active <code>tuned</code> profile to <code>virtual-guest</code> and make it persist.</p>"+
-          "<p>Report which profile <code>tuned</code> recommends for this machine.</p>"},
-    {id:"T26", node:"node1", title:"Rootless container at boot",
-     body:"<p>As the user <code>harry</code>, using <b>rootless</b> <code>podman</code>:</p><ul>"+
-          "<li>Pull the <code>registry.access.redhat.com/ubi9/ubi</code> image</li>"+
-          "<li>Run a container named <code>webtest</code> that stays running</li>"+
-          "<li>Configure it to start automatically at boot as a systemd <b>user</b> service</li></ul>"},
-    {id:"T27", node:"node1", title:"Extend a logical volume",
-     body:"<p>Grow <code>vgdata/lvdata</code> to <b>1 GiB</b>, including the filesystem, <b>without unmounting it</b>.</p>"},
-    {id:"T28", node:"node1", title:"Second logical volume",
-     body:"<p>Create a logical volume <code>lvlogs</code> of <b>256 MiB</b>, formatted <code>ext4</code>, mounted "+
-          "persistently at <code>/var/log/archive</code> with the <code>noexec</code> option.</p>"},
-    {id:"T29", node:"node1", title:"Password aging",
-     body:"<p>For the user <code>natasha</code>:</p><ul><li>Password expires after <b>60 days</b></li>"+
-          "<li>Warn <b>10 days</b> before expiry</li><li>Account locks after <b>7 days</b> of password inactivity</li>"+
-          "<li>Force a password change at next login</li></ul>"},
-    {id:"T30", node:"node1", title:"Privileged access",
-     body:"<p>Configure sudo so that members of the <code>admin</code> group may run <b>only</b> "+
-          "<code>/usr/bin/systemctl</code> and <code>/usr/bin/journalctl</code> as root, without a password prompt.</p>"+
-          "<p>Nothing else. Verify as <code>harry</code>.</p>"}
-  ]
-},
-{
-  name: "Practice Exam 3 — Variation",
-  tasks: [
-    {id:"T31", node:"node1", title:"Configure networking",
-     body:"<p>Set the host-only interface to:</p><ul><li>IPv4 <code>192.168.56.150/24</code></li>"+
-          "<li>Gateway <code>192.168.56.1</code></li><li>DNS <code>8.8.8.8</code> <b>and</b> <code>192.168.56.1</code>, in that order</li>"+
-          "<li>Static hostname <code>server3.lab.example.com</code></li></ul>"},
-    {id:"T32", node:"node1", title:"Create users with constraints",
-     body:"<ul><li><code>dbadmin</code> — UID <code>2500</code>, primary group <code>dba</code>, shell <code>/bin/bash</code></li>"+
-          "<li><code>svcbackup</code> — system account, no home directory, non-interactive shell</li>"+
-          "<li><code>intern</code> — account expires on <code>2027-01-01</code></li></ul>"+
-          "<p>Password for <code>dbadmin</code> and <code>intern</code>: <code>Passw0rd!23</code></p>"},
-    {id:"T33", node:"node1", title:"Create and extract an archive",
-     body:"<p>Create <code>/root/etcbackup.tar.gz</code> containing <code>/etc/hosts</code>, <code>/etc/fstab</code> "+
-          "and <code>/etc/passwd</code>, preserving permissions.</p><p>Then extract it to <code>/tmp/restore/</code> "+
-          "so the files land as <code>/tmp/restore/etc/hosts</code> and so on.</p>"},
-    {id:"T34", node:"node1", title:"Hard and symbolic links",
-     body:"<p>In <code>/opt/links</code> create:</p><ul><li>A <b>hard</b> link named <code>hard-fstab</code> to <code>/etc/fstab</code></li>"+
-          "<li>A <b>symbolic</b> link named <code>soft-fstab</code> to <code>/etc/fstab</code></li></ul>"+
-          "<p>Write a one-line explanation to <code>/opt/links/NOTES.txt</code> of what happens to each if "+
-          "<code>/etc/fstab</code> is deleted.</p>"},
-    {id:"T35", node:"node1", title:"Default file permissions",
-     body:"<p>Set the system-wide default <code>umask</code> to <code>027</code> for all interactive login shells, "+
-          "so new files are created <code>640</code> and new directories <code>750</code>.</p>"+
-          "<p>It must apply to new logins after a reboot.</p>"},
-    {id:"T36", node:"node1", title:"Shared drop directory",
-     body:"<p>Create <code>/srv/dropbox</code> where any user can create files, but users can <b>only delete their "+
-          "own</b> files. The directory must be group-owned by <code>dba</code>.</p>"},
-    {id:"T37", node:"node1", title:"Find files by criteria",
-     body:"<p>Find every file under <code>/etc</code> larger than <b>100 KB</b> and modified within the last "+
-          "<b>30 days</b>. Write their full paths to <code>/root/bigrecent.txt</code>, one per line.</p>"},
-    {id:"T38", node:"node1", title:"Kernel tunable",
-     body:"<p>Make <code>net.ipv4.ip_forward</code> equal to <code>1</code> persistently, using a drop-in file — "+
-          "<b>not</b> by editing <code>/etc/sysctl.conf</code>.</p>"},
-    {id:"T39", node:"node1", title:"Default boot target",
-     body:"<p>Set the system default boot target to <code>multi-user.target</code> and confirm it.</p>"+
-          "<p>Report which target the system is in right now.</p>"},
-    {id:"T40", node:"node1", title:"Prevent a service from starting",
-     body:"<p>Install <code>httpd</code> but ensure it can never be started accidentally — mask it.</p>"+
-          "<p>Prove that <code>systemctl start httpd</code> fails.</p>"},
-    {id:"T41", node:"node1", title:"Swap file",
-     body:"<p>Add a <b>1 GiB</b> swap <b>file</b> at <code>/swapfile</code>, active at boot, without disturbing "+
-          "existing swap.</p>",
-     note:"This is a file, not a partition. The fstab syntax and the required permissions differ."},
-    {id:"T42", node:"node1", title:"Create a volume group and logical volume",
-     body:"<ul><li>Volume group <code>vgapp</code>, PE size <code>16M</code></li>"+
-          "<li>Logical volume <code>lvapp</code>, <b>768 MiB</b>, <code>ext4</code></li>"+
-          "<li>Mounted persistently at <code>/srv/app</code> with the <code>nodev</code> option</li></ul>"},
-    {id:"T43", node:"node1", title:"Shrink a volume and take a snapshot",
-     body:"<p>Shrink <code>lvapp</code> to <b>512 MiB</b> safely, then create a snapshot logical volume named "+
-          "<code>lvapp-snap</code> of <b>128 MiB</b>.</p>",
-     note:"<code>ext4</code> can be shrunk; <code>xfs</code> cannot. The order of operations matters."},
-    {id:"T44", node:"node1", title:"SELinux port label",
-     body:"<p>Configure <code>httpd</code> to listen on port <code>8088</code> with SELinux <b>enforcing</b>. "+
-          "Unmask the service first.</p><p>Confirm with <code>curl http://localhost:8088/</code>.</p>"},
-    {id:"T45", node:"node1", title:"Recover an unbootable system",
-     body:"<p>Add a deliberately invalid line to <code>/etc/fstab</code> referencing a non-existent UUID, then "+
-          "reboot. The system will drop to emergency mode.</p><p>Recover it without reinstalling, remove the bad "+
-          "line, and confirm a clean boot.</p>",
-     note:"A bad fstab entry is the classic way candidates lose an exam machine with 40 minutes left."}
-  ]
-},
-{
-  name: "Practice Exam 4 — Gap Closure",
-  tasks: [
-    {id:"T46", node:"node1", title:"Flatpak software management",
-     body:"<p>Install Flatpak support, add the Flathub remote, install any Flatpak application, list installed "+
-          "Flatpaks, then remove the one you installed.</p>"},
-    {id:"T47", node:"node1", title:"Key-based SSH authentication",
-     body:"<p>As <code>harry</code> on node1, generate an SSH keypair and deploy the public key so that "+
-          "<code>harry</code> can log into <b>node2</b> without a password.</p>"+
-          "<p>Then disable <b>password</b> authentication on node2's sshd entirely.</p>"},
-    {id:"T48", node:"node1", title:"SELinux booleans",
-     body:"<p>Allow <code>httpd</code> to make outbound network connections, persistently, using a boolean — "+
-          "not by disabling SELinux.</p><p>List every currently-enabled boolean whose name contains "+
-          "<code>httpd</code> and write them to <code>/root/httpd-booleans.txt</code>.</p>"},
-    {id:"T49", node:"node1", title:"systemd timer unit",
-     body:"<p>Replace a cron job with a systemd timer:</p><ul><li>A service unit <code>hello.service</code> "+
-          "running <code>/bin/echo hello</code></li><li>A timer unit <code>hello.timer</code> triggering it every "+
-          "<b>10 minutes</b></li><li>Enabled and active, surviving reboot</li></ul><p>Do not use cron.</p>"},
-    {id:"T50", node:"node1", title:"One-time scheduled job",
-     body:"<p>Schedule a one-time job using <code>at</code> that writes the date into <code>/root/at-ran.txt</code>, "+
-          "scheduled for <code>23:55</code> today. Confirm it is queued and that <code>atd</code> is enabled.</p>"},
-    {id:"T51", node:"node1", title:"VFAT filesystem",
-     body:"<p>On a spare disk, create a <b>1 GiB</b> partition formatted <b>VFAT</b>, mounted persistently at "+
-          "<code>/mnt/usbsim</code> by <b>UUID</b>.</p>"},
-    {id:"T52", node:"node1", title:"IPv6 addressing",
-     body:"<p>Add the static IPv6 address <code>fd00:56::101/64</code> to the host-only connection, persistently, "+
-          "without disturbing IPv4. Verify with <code>ping6</code>.</p>"},
-    {id:"T53", node:"node1", title:"Local hostname resolution",
-     body:"<p>Make <code>node2.lab.local</code> and <code>db.lab.local</code> both resolve to "+
-          "<code>192.168.56.102</code> locally, without DNS. Verify with <code>getent hosts</code>.</p>"},
-    {id:"T54", node:"node1", title:"Process management",
-     body:"<p>Start a CPU-intensive process in the background. Identify it by highest CPU usage and record its PID "+
-          "in <code>/root/hog.txt</code>. Renice it to priority <code>19</code>, then kill it.</p>"+
-          "<p>Leave <code>/root/hog.txt</code> in place.</p>"},
-    {id:"T55", node:"node1", title:"Boot into a specific target",
-     body:"<p>Reboot and interrupt the bootloader to boot <b>once</b> into <code>rescue.target</code> — without "+
-          "changing the default target.</p><p>Once there, create <code>/root/rescue-proof.txt</code> containing the "+
-          "output of <code>systemctl get-default</code>, then boot normally again.</p>"},
-    {id:"T56", node:"node1", title:"Secure file transfer",
-     body:"<p>Copy <code>/etc/redhat-release</code> from node1 to node2 at <code>/root/from-node1.txt</code> using "+
-          "<code>scp</code>.</p><p>Then use <code>rsync</code> to sync <code>/etc/sysconfig</code> from node1 to "+
-          "node2 at <code>/root/sysconfig-copy/</code>, preserving permissions.</p>"},
-    {id:"T57", node:"node1", title:"bzip2 archive",
-     body:"<p>Create <code>/root/logs.tar.bz2</code> containing <code>/var/log/messages</code> (or "+
-          "<code>/var/log/secure</code>), compressed with <b>bzip2</b> specifically — not gzip.</p>"+
-          "<p>Verify the compression type with <code>file</code>.</p>"},
-    {id:"T58", node:"node1", title:"Modify the bootloader",
-     body:"<p>Add the kernel boot parameter <code>quiet=0</code> to <b>all</b> installed kernels persistently, "+
-          "using <code>grubby</code>. Verify it is present in the boot entries, then remove it again cleanly.</p>"},
-    {id:"T59", node:"node1", title:"Diagnose and repair permissions",
-     body:"<p>Run the following to break it, then repair it:</p>"+
-          "<p><code>mkdir -p /srv/broken &amp;&amp; echo secret &gt; /srv/broken/data.txt</code><br>"+
-          "<code>chmod 000 /srv/broken /srv/broken/data.txt</code><br>"+
-          "<code>chown nobody:nobody /srv/broken/data.txt</code></p>"+
-          "<p>Make it so that <code>harry</code> can read and write <code>data.txt</code>; the file is owned by "+
-          "<code>root:admin</code>; and <code>/srv/broken</code> is traversable by everyone but writable only by "+
-          "<code>admin</code>.</p>"},
-    {id:"T60", node:"node1", title:"Switching users",
-     body:"<p>Verify you can switch to <code>harry</code> with a full login shell and land in his home directory.</p>"+
-          "<p>Write a one-line explanation of the difference between <code>su harry</code> and <code>su - harry</code> "+
-          "to <code>/root/su-difference.txt</code>.</p><p>Confirm <code>dbadmin</code> can escalate via <code>sudo -i</code>.</p>"}
-  ]
-}
+/* ------------------------------------------------------------------ scenarios
+   Templates, not a fixed list. Each one is rendered with randomised values, so
+   "New random exam" produces a genuinely different paper every time rather than
+   reshuffling the same 34 questions. */
+const R = (a) => a[Math.floor(Math.random()*a.length)];
+const RI = (lo,hi) => lo + Math.floor(Math.random()*(hi-lo+1));
+
+const USERS  = ["harry","natasha","tom","alex","mary","alice","bobby","dbadmin","intern","jack","ira","lucy","eric","sarah"];
+const GROUPS = ["admin","adminuser","dba","ops","devs","sysadmin"];
+const SIZES  = ["512M","768M","1G","1500M","2G"];
+const SWAPS  = ["512M","754M","1G","1500M","2G"];
+const PES    = ["4M","8M","16M","32M"];
+const FSS    = ["ext4","xfs"];
+
+const TEMPLATES = [
+ {topic:"Networking", node:"node1", gen:()=>{const o=RI(20,200);return{
+   title:"Configure networking",
+   body:`<p>Configure the host-only interface with these static values:</p><ul>
+     <li>IPv4 <code>192.168.56.${o}/24</code></li><li>Gateway <code>192.168.56.1</code></li>
+     <li>DNS <code>192.168.56.1</code></li>
+     <li>Static hostname <code>node1.lab${o}.example.com</code></li></ul>
+     <p>Add <code>10.0.${RI(1,9)}.5/24</code> as a <b>secondary</b> address on the same
+     connection without disturbing the settings above.</p>`,
+   note:"The word <em>secondary</em> is the whole task. Replacing the primary fails it."}}},
+
+ {topic:"Users & Groups", node:"node1", gen:()=>{const g=R(GROUPS),a=R(USERS),b=R(USERS.filter(x=>x!==a)),c=R(USERS.filter(x=>x!==a&&x!==b));return{
+   title:"Create users and groups",
+   body:`<p>Create the group <code>${g}</code> and the users <code>${a}</code>,
+     <code>${b}</code> and <code>${c}</code>.</p><ul>
+     <li><code>${a}</code> and <code>${b}</code> take <code>${g}</code> as a
+         <b>supplementary</b> group</li>
+     <li><code>${c}</code> must have a non-interactive login shell and must
+         <b>not</b> belong to <code>${g}</code></li></ul>`,
+   note:"Create the group first — <code>useradd -G</code> fails outright if it does not exist."}}},
+
+ {topic:"Users & Groups", node:"node1", gen:()=>{const u=R(USERS),id=RI(1200,4000);return{
+   title:"Create a user with a fixed UID",
+   body:`<p>Create the user <code>${u}</code> with UID <code>${id}</code> and the password
+     <code>Passw0rd!${RI(10,99)}</code>.</p>`}}},
+
+ {topic:"Permissions", node:"node1", gen:()=>{const g=R(GROUPS),d=R(["/home/admins","/srv/shared","/common/team","/opt/projects"]);return{
+   title:"Collaborative directory",
+   body:`<p>Create <code>${d}</code> owned by group <code>${g}</code> such that:</p><ul>
+     <li>members of <code>${g}</code> can read and write</li>
+     <li>all other users have no access at all</li>
+     <li>files created inside automatically belong to <code>${g}</code></li></ul>`,
+   note:"That last bullet is a special permission bit, not a normal mode."}}},
+
+ {topic:"Permissions", node:"node1", gen:()=>{const g=R(GROUPS),d=R(["/srv/dropbox","/var/incoming","/srv/upload"]);return{
+   title:"Shared drop directory",
+   body:`<p>Create <code>${d}</code>, group-owned by <code>${g}</code>, where any user may
+     create files but users may <b>only delete their own</b>.</p>`}}},
+
+ {topic:"Permissions (ACL)", node:"node1", gen:()=>{const a=R(USERS),b=R(USERS.filter(x=>x!==a)),f=R(["/var/tmp/fstab","/srv/report.txt","/var/tmp/hosts"]);return{
+   title:"Access control lists",
+   body:`<p>Copy <code>/etc/fstab</code> to <code>${f}</code>, owned by <code>root:root</code>,
+     and configure it so that:</p><ul>
+     <li>it is not executable by anyone</li>
+     <li><code>${a}</code> can read and write it</li>
+     <li><code>${b}</code> can neither read nor write it</li>
+     <li>all other users, current and future, can read it</li></ul>`}}},
+
+ {topic:"Cron", node:"node1", gen:()=>{const u=R(USERS),h=RI(0,23),m=RI(0,59),msg=R(["hello","hiya","Hello World.","heartbeat"]);return{
+   title:"Scheduled task",
+   body:`<p>Configure a job for user <code>${u}</code> that runs
+     <code>/bin/echo ${msg}</code> at <b>${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}</b>
+     local time, every day.</p>`,
+   note:"Cron fields start with the minute, not the hour."}}},
+
+ {topic:"Scheduling", node:"node1", gen:()=>{const n=R([5,10,15,30]);return{
+   title:"systemd timer",
+   body:`<p>Create a systemd <b>timer</b> named <code>hello.timer</code> and a matching
+     service that runs <code>/bin/echo hello</code> every <b>${n} minutes</b>.</p>
+     <p>It must be enabled and active, and survive a reboot. Do not use cron.</p>`,
+   note:"A timer unit with no <code>[Install]</code> section enables silently and never fires."}}},
+
+ {topic:"Find & Copy", node:"node1", gen:()=>{const u=R(USERS),d=R(["/opt/dir","/root/findresults","/tmp/collected"]);return{
+   title:"Find files by owner",
+   body:`<p>Find every <b>regular file</b> on the system owned by <code>${u}</code> and copy
+     it to <code>${d}</code>, preserving ownership and permissions.</p>`}}},
+
+ {topic:"Text", node:"node1", gen:()=>{const s=R(["abcde","seismic","ERROR","root","daemon"]),o=R(["/root/wordlist","/tmp/testfile","/root/lines.txt"]);return{
+   title:"Filter file contents",
+   body:`<p>Write every line of <code>/usr/share/dict/words</code> or <code>/etc/testfile</code>
+     containing <code>${s}</code> to <code>${o}</code>, in the original order, with no blank
+     lines and each line an exact copy.</p>`}}},
+
+ {topic:"Swap", node:"node1", gen:()=>{const s=R(SWAPS);return{
+   title:"Add swap space",
+   body:`<p>Add a <b>${s}</b> swap partition that activates automatically at boot. The existing
+     swap must remain in place and active.</p><p>Reference it in <code>/etc/fstab</code> by
+     <b>UUID</b>.</p>`,
+   note:"Spare disks are <code>/dev/sdb</code> and <code>/dev/sdc</code>. Confirm with <code>lsblk</code>."}}},
+
+ {topic:"Swap", node:"node1", gen:()=>{const s=R(["512M","1G","2G"]);return{
+   title:"Add a swap file",
+   body:`<p>Add a <b>${s}</b> swap <b>file</b> at <code>/swapfile</code>, active at boot,
+     without disturbing existing swap.</p>`,
+   note:"A swap file is not a partition. Its permissions matter and it goes in fstab by path."}}},
+
+ {topic:"LVM", node:"node1", gen:()=>{const vg=R(["vgdata","vgapp","datastore","vg0"]),lv=R(["lvdata","lvapp","database","lv0"]),pe=R(PES),sz=R(SIZES),fs=R(FSS),mp=R(["/data","/srv/app","/mnt/database"]);return{
+   title:"Create a logical volume",
+   body:`<p>Create:</p><ul>
+     <li>volume group <code>${vg}</code> with a <b>${pe}</b> physical extent size</li>
+     <li>logical volume <code>${lv}</code> of <b>${sz}</b>, formatted <code>${fs}</code></li>
+     <li>mounted persistently at <code>${mp}</code></li></ul>`,
+   note:"If a task states a size in <em>extents</em> rather than megabytes, the flag is different."}}},
+
+ {topic:"LVM", node:"node1", gen:()=>{const lv=R(["lvdata","lvapp","vo"]),to=R(["1G","1200M","1500M"]);return{
+   title:"Extend a logical volume",
+   body:`<p>Grow the logical volume <code>${lv}</code> to <b>${to}</b>, including its
+     filesystem, <b>without unmounting it</b>. Contents must remain intact.</p>`}}},
+
+ {topic:"LVM", node:"node1", gen:()=>{const lv=R(["lvapp","shrink","vo"]),to=R(["256M","320M","512M"]);return{
+   title:"Shrink a logical volume",
+   body:`<p>Reduce the logical volume <code>${lv}</code> to <b>${to}</b> without any loss of
+     data.</p>`,
+   note:"One common filesystem cannot be shrunk at all. Check which one you are on first."}}},
+
+ {topic:"Filesystems", node:"node1", gen:()=>{const sz=R(["512M","1G","2G"]),fs=R(["ext4","vfat","xfs"]),mp=R(["/mnt/data","/mnt/usbsim","/srv/extra"]);return{
+   title:"Partition and mount",
+   body:`<p>Create a <b>${sz}</b> partition formatted <code>${fs}</code>, mounted persistently
+     at <code>${mp}</code> by <b>UUID</b>.</p>`,
+   note:"Run <code>mount -a</code> before you reboot. A bad fstab line means emergency mode."}}},
+
+ {topic:"Web", node:"node1", gen:()=>{const s="LAB-"+RI(1000,9999);return{
+   title:"Configure a web server",
+   body:`<p>Install and configure Apache so it serves a page containing <code>${s}</code> at
+     <code>http://192.168.56.101/</code>.</p><p>It must be reachable <b>from node2</b> and
+     still work after a reboot.</p>`,
+   note:"Working from localhost proves nothing about the firewall."}}},
+
+ {topic:"Web + SELinux", node:"node1", gen:()=>{const p=R([8088,8090,8181,9090]);return{
+   title:"Non-standard web port",
+   body:`<p>Configure Apache to listen on port <b>${p}</b> with SELinux <b>enforcing</b>.</p>
+     <p>Confirm with <code>curl http://localhost:${p}/</code>.</p>`,
+   note:"SELinux labels ports as well as files."}}},
+
+ {topic:"FTP", node:"node1", gen:()=>({
+   title:"Configure an FTP server",
+   body:`<p>Install and configure <code>vsftpd</code> for <b>anonymous download</b> from
+     <code>/var/ftp/pub</code>. Place a file named <code>README</code> there.</p>
+     <p>It must be retrievable from node2 and survive a reboot.</p>`})},
+
+ {topic:"Firewall", node:"node1", gen:()=>{const n=R(["172.25.0.0/16","10.10.0.0/16","192.0.2.0/24","198.51.100.0/24"]);return{
+   title:"Restrict network access",
+   body:`<p>Reject all traffic originating from <code>${n}</code>. Existing services must keep
+     working, and your other firewall configuration must not be discarded.</p>`,
+   note:"Flushing the ruleset also destroys work from earlier tasks."}}},
+
+ {topic:"SELinux", node:"node1", gen:()=>({
+   title:"SELinux mode and contexts",
+   body:`<p>Ensure SELinux is in <b>enforcing</b> mode at boot, and that content served by the
+     web server carries the correct SELinux type.</p>`,
+   note:"Setting the mode at runtime is not the same as setting it at boot."})},
+
+ {topic:"SELinux", node:"node1", gen:()=>({
+   title:"SELinux boolean",
+   body:`<p>Allow <code>httpd</code> to make outbound network connections, persistently, using
+     a boolean — not by disabling or weakening SELinux.</p>
+     <p>Write every currently-enabled boolean whose name contains <code>httpd</code> to
+     <code>/root/httpd-booleans.txt</code>.</p>`})},
+
+ {topic:"Storage / NFS", node:"node1", gen:()=>({
+   title:"Export an NFS share",
+   body:`<p>Export <code>/srv/nfsshare</code> read-write, restricted to
+     <code>192.168.56.0/24</code> only. Create a file inside it.</p>`})},
+
+ {topic:"Storage / NFS", node:"node2", gen:()=>({
+   title:"Mount an NFS share",
+   body:`<p>On <b>node2</b>, mount node1's <code>/srv/nfsshare</code> at
+     <code>/mnt/remote</code> persistently.</p>`,
+   note:"An unreachable NFS server can hang the boot. There is a mount option for that."})},
+
+ {topic:"Storage / autofs", node:"node2", gen:()=>({
+   title:"Configure autofs",
+   body:`<p>On <b>node2</b>, configure <code>autofs</code> so <code>/net/shared</code>
+     automatically mounts node1's <code>/srv/nfsshare</code> on access and unmounts when
+     idle.</p>`})},
+
+ {topic:"Repository", node:"node1", gen:()=>({
+   title:"Configure a software repository",
+   body:`<p>Configure a <code>dnf</code> repository named <code>local</code> that uses the
+     attached installation media, with GPG checking disabled. It must be usable by
+     <code>dnf</code> and persist across reboots.</p>`,
+   note:"If the repo points at a mount, that mount has to persist too."})},
+
+ {topic:"Software", node:"node1", gen:()=>({
+   title:"Flatpak",
+   body:`<p>Install Flatpak support, add the Flathub remote, install any Flatpak application,
+     list what is installed, then remove the one you installed.</p>`})},
+
+ {topic:"Kernel", node:"node1", gen:()=>({
+   title:"Kernel and bootloader",
+   body:`<p>Ensure the newest installed kernel is the default boot target, without removing
+     the previous kernel.</p>`,
+   note:"Upgrading and installing are different operations here. One keeps the old kernel."})},
+
+ {topic:"Boot", node:"node1", gen:()=>{const a=R(["quiet=0","debug","audit=1","nosmt"]);return{
+   title:"Kernel boot parameter",
+   body:`<p>Add the kernel boot parameter <code>${a}</code> to <b>all</b> installed kernels
+     persistently, verify it is present, then remove it again cleanly.</p>`}}},
+
+ {topic:"Boot", node:"node1", gen:()=>({
+   title:"Default boot target",
+   body:`<p>Set the system default boot target to <code>multi-user.target</code>, and report
+     which target the system is in right now.</p>`})},
+
+ {topic:"Root recovery", node:"node2", gen:()=>({
+   title:"Recover the root password",
+   body:`<p>You do not know the root password on <b>node2</b>. Gain access and set it to
+     <code>Rhcsa!2026</code>.</p>`,
+   note:"The procedure differs between RHEL 9 and RHEL 10 — <code>rd.break</code> works on one of them only. Whichever you use, the SELinux relabel step is not optional."})},
+
+ {topic:"Time", node:"node1", gen:()=>{const tz=R(["America/New_York","Europe/London","Asia/Tokyo","America/Chicago"]);return{
+   title:"Time services",
+   body:`<p>Configure the system to synchronise time from <code>192.168.56.1</code>, set the
+     timezone to <code>${tz}</code>, and confirm NTP synchronisation is enabled.</p>`}}},
+
+ {topic:"Logs", node:"node1", gen:()=>({
+   title:"Logs and journal persistence",
+   body:`<p>Write every failed SSH login attempt since the last boot to
+     <code>/root/failed-logins.txt</code>, then make the system journal <b>persistent</b>
+     across reboots.</p>`})},
+
+ {topic:"Processes", node:"node1", gen:()=>({
+   title:"Process management",
+   body:`<p>Start a CPU-intensive process in the background. Identify it by highest CPU usage,
+     record its PID in <code>/root/hog.txt</code>, renice it to priority <code>19</code>,
+     then kill it.</p>`})},
+
+ {topic:"Tuning", node:"node1", gen:()=>{const p=R(["virtual-guest","throughput-performance","balanced","powersave"]);return{
+   title:"Tuning profile",
+   body:`<p>Set the active <code>tuned</code> profile to <code>${p}</code> and make it persist.
+     Report which profile <code>tuned</code> recommends for this machine.</p>`}}},
+
+ {topic:"sudo", node:"node1", gen:()=>{const g=R(GROUPS);return{
+   title:"Privileged access",
+   body:`<p>Configure sudo so members of <code>${g}</code> may run <b>only</b>
+     <code>/usr/bin/systemctl</code> and <code>/usr/bin/journalctl</code> as root, with no
+     password prompt. Nothing else.</p>`,
+   note:"Validate the file before you log out."}}},
+
+ {topic:"SSH", node:"node1", gen:()=>{const u=R(USERS);return{
+   title:"Key-based SSH authentication",
+   body:`<p>As <code>${u}</code> on node1, generate a keypair and deploy it so
+     <code>${u}</code> can log into <b>node2</b> without a password. Then disable password
+     authentication on node2's sshd entirely.</p>`}}},
+
+ {topic:"Password aging", node:"node1", gen:()=>{const u=R(USERS),mx=R([30,60,90]),w=R([5,7,10]),i=R([3,7,14]);return{
+   title:"Password aging",
+   body:`<p>For user <code>${u}</code>: password expires after <b>${mx} days</b>, warn
+     <b>${w} days</b> before expiry, lock the account after <b>${i} days</b> of password
+     inactivity, and force a password change at next login.</p>`}}},
+
+ {topic:"Archives", node:"node1", gen:()=>{const c=R(["gzip","bzip2"]),src=R(["/usr/local","/etc","/var/log"]);return{
+   title:"Create an archive",
+   body:`<p>Create <code>/root/backup.tar.${c==="gzip"?"gz":"bz2"}</code> containing
+     <code>${src}</code>, compressed with <b>${c}</b>, preserving permissions.</p>`,
+   note:"The tar flag for one compressor is not the flag for the other."}}},
+
+ {topic:"Links", node:"node1", gen:()=>({
+   title:"Hard and symbolic links",
+   body:`<p>In <code>/opt/links</code>, create a <b>hard</b> link and a <b>symbolic</b> link,
+     both to <code>/etc/fstab</code>. Write a one-line explanation of what happens to each
+     if <code>/etc/fstab</code> is deleted to <code>/opt/links/NOTES.txt</code>.</p>`})},
+
+ {topic:"Defaults", node:"node1", gen:()=>{const m=R(["022","027","002","077"]);return{
+   title:"Default file permissions",
+   body:`<p>Set the system-wide default <code>umask</code> to <code>${m}</code> for all
+     interactive login shells. It must apply to new logins after a reboot.</p>`}}},
+
+ {topic:"Kernel tunables", node:"node1", gen:()=>({
+   title:"Kernel tunable",
+   body:`<p>Make <code>net.ipv4.ip_forward</code> equal to <code>1</code> persistently, using
+     a drop-in file rather than editing <code>/etc/sysctl.conf</code>.</p>`})},
+
+ {topic:"Networking", node:"node1", gen:()=>({
+   title:"Local name resolution",
+   body:`<p>Make <code>node2.lab.local</code> and <code>db.lab.local</code> both resolve to
+     <code>192.168.56.102</code> locally, without DNS.</p>`})},
+
+ {topic:"Networking", node:"node1", gen:()=>{const n=RI(100,250);return{
+   title:"IPv6 addressing",
+   body:`<p>Add the static IPv6 address <code>fd00:56::${n}/64</code> to the host-only
+     connection, persistently, without disturbing IPv4.</p>`}}},
+
+ {topic:"Services", node:"node1", gen:()=>{const s=R(["httpd","vsftpd","nfs-server"]);return{
+   title:"Prevent a service from starting",
+   body:`<p>Install <code>${s}</code> but ensure it can never be started accidentally, then
+     prove that starting it fails.</p>`,
+   note:"Disabling and preventing are different things here."}}},
+
+ {topic:"Troubleshooting", node:"node1", gen:()=>({
+   title:"Recover an unbootable system",
+   body:`<p>Add an invalid line to <code>/etc/fstab</code> referencing a non-existent UUID and
+     reboot. The system will drop to emergency mode. Recover it without reinstalling, remove
+     the bad line, and confirm a clean boot.</p>`,
+   note:"This is the single most common way candidates lose a machine mid-exam."})},
+
+ {topic:"Transfer", node:"node1", gen:()=>({
+   title:"Secure file transfer",
+   body:`<p>Copy <code>/etc/redhat-release</code> from node1 to node2 at
+     <code>/root/from-node1.txt</code> using <code>scp</code>, then sync
+     <code>/etc/sysconfig</code> to node2 at <code>/root/sysconfig-copy/</code> using
+     <code>rsync</code>, preserving permissions.</p>`})},
+
+ {topic:"Scripting", node:"node1", gen:()=>({
+   title:"Shell script with arguments",
+   body:`<p>Write <code>/usr/local/bin/reportuser</code> so that with no argument it prints a
+     usage message and exits <code>1</code>; with an existing username it prints that user's
+     UID, primary group and shell; and with a non-existent username it prints
+     <code>no such user: &lt;name&gt;</code> and exits <code>2</code>. Executable by
+     everyone.</p>`})},
+
+ {topic:"Scripting", node:"node1", gen:()=>({
+   title:"Shell script with a loop",
+   body:`<p>Write <code>/usr/local/bin/sizes</code> which takes one directory argument and
+     prints <code>&lt;filename&gt; &lt;size-in-bytes&gt;</code> for every regular file directly
+     inside it, largest first. If the argument is not a directory, exit <code>1</code> with an
+     error on stderr.</p>`})},
+
+ {topic:"Scheduling", node:"node1", gen:()=>{const h=RI(0,23),m=RI(0,59);return{
+   title:"One-time scheduled job",
+   body:`<p>Schedule a <b>one-time</b> job that writes the date into
+     <code>/root/at-ran.txt</code> at <b>${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}</b>
+     today. Confirm it is queued and that the scheduler is enabled.</p>`}}},
 ];
 
-</script>
-<script>
-(function(){
-  const $=s=>document.querySelector(s);
-  const KEY='rhcsa-exam-state';
-  let state={exam:0,idx:0,endsAt:null,paused:null,done:{},flag:{},limit:180};
+/* ------------------------------------------------------------------ state */
+const $ = s => document.querySelector(s);
+const KEY = "rhcsa-exam-v2";
+let S = {tasks:[], idx:-1, endsAt:null, paused:null, mins:180, who:"", done:{}, flag:{}};
 
-  function save(){localStorage.setItem(KEY,JSON.stringify(state))}
-  function load(){try{const r=localStorage.getItem(KEY);if(r)state=Object.assign(state,JSON.parse(r))}catch(e){}}
+function buildExam(n){
+  const pool = [];
+  // draw templates without immediate repeats, then top up if n > template count
+  const shuffled = TEMPLATES.slice().sort(()=>Math.random()-0.5);
+  for (let i=0;i<n;i++){
+    const t = shuffled[i % shuffled.length];
+    const g = t.gen();
+    pool.push({topic:t.topic, node:t.node, title:g.title, body:g.body, note:g.note||""});
+  }
+  // node1 tasks first, then node2 — same grouping the real paper uses
+  pool.sort((a,b)=> (a.node===b.node) ? 0 : (a.node==="node1" ? -1 : 1));
+  return pool;
+}
 
-  function fillSelects(){
-    EXAMS.forEach((e,i)=>{
-      [$('#examPick'),$('#examStart')].forEach(sel=>{
-        const o=document.createElement('option');o.value=i;o.textContent=e.name;sel.appendChild(o);
-      });
+const save = () => localStorage.setItem(KEY, JSON.stringify(S));
+function load(){ try{ const r=localStorage.getItem(KEY); if(r) S=Object.assign(S,JSON.parse(r)); }catch(e){} }
+
+function toast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("on");
+  setTimeout(()=>t.classList.remove("on"), 2200);
+}
+
+/* ------------------------------------------------------------------ render */
+function renderOverview(){
+  $("#prepared").textContent = "RHCSA practice exam prepared for " + (S.who || "you");
+  const groups = {node1:[], node2:[]};
+  S.tasks.forEach((t,i)=> groups[t.node].push({t,i}));
+
+  let html = "";
+  for (const node of ["node1","node2"]){
+    if (!groups[node].length) continue;
+    html += `<div class="nodehdr">Perform the following tasks on <code>${node}.lab.example.com</code>.</div>`;
+    html += `<table class="tasks">`;
+    groups[node].forEach(({t,i})=>{
+      const d = !!S.done[i], f = !!S.flag[i];
+      html += `<tr class="${d?'done':''} ${f?'flag':''}">
+        <td class="rd">
+          <label><input type="radio" name="st${i}" ${f?'checked':''} data-i="${i}" data-v="flag"> Revisit</label>
+          <label><input type="radio" name="st${i}" ${d?'checked':''} data-i="${i}" data-v="done"> Done</label>
+        </td>
+        <td><a class="task" data-open="${i}">Configure your system ${String(i+1).padStart(2,"0")}</a></td>
+      </tr>`;
     });
+    html += `</table>`;
   }
+  $("#taskGroups").innerHTML = html;
 
-  function tasks(){return EXAMS[state.exam].tasks}
-  function key(i){return state.exam+':'+i}
+  // level rail, Bandit-style
+  $("#levelList").innerHTML = S.tasks.map((t,i)=>
+    `<a data-open="${i}" class="${S.idx===i?'cur':''} ${S.done[i]?'done':''} ${S.flag[i]?'flag':''}">Task ${String(i+1).padStart(2,"0")} &rarr; ${String(i+2).padStart(2,"0")}</a>`
+  ).join("");
+}
 
-  function renderList(){
-    const ul=$('#tasklist');ul.innerHTML='';
-    tasks().forEach((t,i)=>{
-      const li=document.createElement('li');
-      if(i===state.idx)li.classList.add('active');
-      if(state.done[key(i)])li.classList.add('done');
-      if(state.flag[key(i)])li.classList.add('flag');
-      const b=document.createElement('button');
-      b.innerHTML='<span class="num">'+t.id+'</span><span class="ttl">'+t.title+'</span>';
-      b.onclick=()=>{state.idx=i;save();render()};
-      li.appendChild(b);ul.appendChild(li);
-    });
-    $('#statDone').textContent=Object.keys(state.done).filter(k=>state.done[k]&&k.startsWith(state.exam+':')).length;
-    $('#statFlag').textContent=Object.keys(state.flag).filter(k=>state.flag[k]&&k.startsWith(state.exam+':')).length;
+function renderDetail(){
+  const t = S.tasks[S.idx]; if(!t) return;
+  $("#dTitle").textContent = `Configure your system ${String(S.idx+1).padStart(2,"0")} — ${t.title}`;
+  $("#dNode").textContent  = t.node;
+  $("#dBody").innerHTML    = t.body;
+  $("#dNote").innerHTML    = t.note ? `<div class="dnote">${t.note}</div>` : "";
+  $("#mDone").textContent  = S.done[S.idx] ? "✓ Done" : "Mark Done";
+  $("#mFlag").textContent  = S.flag[S.idx] ? "⚑ Flagged" : "Flag for revisit";
+}
+
+function show(which){
+  $("#overview").classList.toggle("hidden", which!=="overview");
+  $("#detail").classList.toggle("on", which==="detail");
+  renderOverview();
+  if(which==="detail") renderDetail();
+  save();
+}
+
+/* ------------------------------------------------------------------ timer */
+function tick(){
+  const box=$("#timerbox"), el=$("#timer");
+  if(!S.endsAt){ el.textContent="--:--"; return; }
+  let ms = S.paused!==null ? (S.endsAt-S.paused) : (S.endsAt-Date.now());
+  const over = ms<0; if(over) ms=-ms;
+  const h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000);
+  el.textContent = (over?"-":"")+h+":"+String(m).padStart(2,"0");
+  box.className = "timerbox" + (over?" over":(ms<15*60000?" low":""));
+}
+
+/* ------------------------------------------------------------------ events */
+document.addEventListener("click", e=>{
+  const open = e.target.closest("[data-open]");
+  if(open){ S.idx = +open.dataset.open; show("detail"); return; }
+});
+document.addEventListener("change", e=>{
+  const r = e.target.closest('input[type="radio"][data-i]');
+  if(!r) return;
+  const i = +r.dataset.i;
+  if(r.dataset.v === "done"){ S.done[i]=true;  S.flag[i]=false; }
+  else                      { S.flag[i]=true;  S.done[i]=false; }
+  save(); renderOverview();
+});
+$("#back").onclick  = ()=> show("overview");
+$("#prev").onclick  = ()=>{ if(S.idx>0){ S.idx--; show("detail"); } };
+$("#next").onclick  = ()=>{ if(S.idx<S.tasks.length-1){ S.idx++; show("detail"); } };
+$("#mDone").onclick = ()=>{ S.done[S.idx]=!S.done[S.idx]; if(S.done[S.idx]) S.flag[S.idx]=false; show("detail"); };
+$("#mFlag").onclick = ()=>{ S.flag[S.idx]=!S.flag[S.idx]; if(S.flag[S.idx]) S.done[S.idx]=false; show("detail"); };
+
+$("#btnPause").onclick = ()=>{
+  if(S.paused===null){ S.paused=Date.now(); $("#btnPause").textContent="Resume"; }
+  else { S.endsAt += Date.now()-S.paused; S.paused=null; $("#btnPause").textContent="Pause"; }
+  save(); tick();
+};
+$("#btnShuffle").onclick = ()=>{
+  if(!confirm("Generate a completely new exam? Values change and progress resets.")) return;
+  S.tasks = buildExam(S.tasks.length || 34);
+  S.done={}; S.flag={}; S.idx=-1;
+  S.endsAt = Date.now() + S.mins*60000; S.paused=null;
+  save(); show("overview"); toast("New exam generated");
+};
+async function launch(node){
+  try{
+    const r = await fetch("/launch/"+node);
+    const j = await r.json();
+    toast(j.ok ? `Opened ${node} terminal` : `Failed: ${j.msg}`);
+  }catch(err){
+    toast("Start serve.py first, then reload this page");
   }
+}
+$("#btnT1").onclick = ()=> launch("node1");
+$("#btnT2").onclick = ()=> launch("node2");
 
-  function renderPaper(){
-    const t=tasks()[state.idx];
-    const isDone=!!state.done[key(state.idx)], isFlag=!!state.flag[key(state.idx)];
-    $('#paper').innerHTML=
-      '<div class="crumbs">'+EXAMS[state.exam].name+' &nbsp;·&nbsp; Task '+(state.idx+1)+' of '+tasks().length+'</div>'+
-      '<h1>'+t.title+'</h1>'+
-      '<div class="node">'+(t.node||'node1')+'</div>'+
-      '<div class="body">'+t.body+'</div>'+
-      (t.note?'<div class="note">'+t.note+'</div>':'')+
-      '<div class="actions">'+
-        '<button id="prev">← Previous</button>'+
-        '<button id="next">Next →</button>'+
-        '<div class="grow"></div>'+
-        '<button class="flagbtn'+(isFlag?' on':'')+'" id="flag">⚑ Flag for review</button>'+
-        '<button class="mark'+(isDone?' on':'')+'" id="mark">'+(isDone?'✓ Marked complete':'Mark complete')+'</button>'+
-      '</div>';
-    $('#prev').onclick=()=>{if(state.idx>0){state.idx--;save();render()}};
-    $('#next').onclick=()=>{if(state.idx<tasks().length-1){state.idx++;save();render()}};
-    $('#mark').onclick=()=>{const k=key(state.idx);state.done[k]=!state.done[k];save();render()};
-    $('#flag').onclick=()=>{const k=key(state.idx);state.flag[k]=!state.flag[k];save();render()};
-  }
+$("#begin").onclick = ()=>{
+  const n = Math.max(5, Math.min(60, +$("#nTasks").value||34));
+  S.mins = Math.max(15, Math.min(360, +$("#mins").value||180));
+  S.who  = ($("#who").value||"").trim();
+  S.tasks = buildExam(n);
+  S.done={}; S.flag={}; S.idx=-1; S.paused=null;
+  S.endsAt = Date.now() + S.mins*60000;
+  save(); $("#start").classList.add("hidden"); show("overview"); tick();
+};
 
-  function render(){$('#examPick').value=state.exam;renderList();renderPaper()}
-
-  function tick(){
-    const el=$('#timer');
-    if(!state.endsAt){el.textContent='--:--:--';return}
-    let ms=state.paused!==null?(state.endsAt-state.paused):(state.endsAt-Date.now());
-    const over=ms<0; if(over)ms=-ms;
-    const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000);
-    const p=n=>String(n).padStart(2,'0');
-    el.textContent=(over?'-':'')+p(h)+':'+p(m)+':'+p(s);
-    el.className='timer'+(over?' over':(ms<15*60000?' low':''));
-  }
-
-  function begin(){
-    state.exam=+$('#examStart').value;
-    state.limit=Math.max(15,Math.min(360,+$('#mins').value||180));
-    state.idx=0;state.done={};state.flag={};state.paused=null;
-    state.endsAt=Date.now()+state.limit*60000;
-    save();$('#startScreen').classList.add('hidden');render();tick();
-  }
-
-  $('#btnStart').onclick=begin;
-  $('#examPick').onchange=e=>{state.exam=+e.target.value;state.idx=0;save();render()};
-  $('#btnPause').onclick=()=>{
-    if(state.paused===null){state.paused=Date.now();$('#btnPause').textContent='Resume'}
-    else{state.endsAt+=Date.now()-state.paused;state.paused=null;$('#btnPause').textContent='Pause'}
-    save();tick();
-  };
-  $('#btnRestart').onclick=()=>{
-    if(confirm('Restart? This clears your completion marks and resets the clock.')){
-      localStorage.removeItem(KEY);location.reload();
-    }
-  };
-  document.addEventListener('keydown',e=>{
-    if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
-    if(e.key==='ArrowLeft'&&state.idx>0){state.idx--;save();render()}
-    if(e.key==='ArrowRight'&&state.idx<tasks().length-1){state.idx++;save();render()}
-  });
-
-  fillSelects();load();
-  if(state.endsAt){$('#startScreen').classList.add('hidden');render()}
-  else{$('#examStart').value=0}
-  setInterval(tick,1000);tick();
-})();
+load();
+if(S.tasks && S.tasks.length){ $("#start").classList.add("hidden"); show("overview"); }
+setInterval(tick, 1000); tick();
 </script>
 </body>
 </html>

@@ -47,7 +47,7 @@ a reboot. That distinction *is* the exam.
 | `rhcsa/reference/` | Answer key, terse-command sheet, persistence rules, known pitfalls |
 | `ansible/` | Idempotent provisioning for the lab nodes — doubles as EX294 practice |
 | `breakfix/` | **Fault injector.** Sabotages the system realistically; you diagnose and fix it |
-| `exam/` | Exam paper UI — countdown timer, task navigation, flag/complete tracking |
+| `exam/` | Exam paper UI styled after the real EX200 console. Generates a fresh randomised paper every run; buttons launch terminals into the nodes |
 | `docs/COVERAGE.md` | **Every published objective mapped to a task and an automated check** |
 
 ---
