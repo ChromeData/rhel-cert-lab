@@ -1,0 +1,108 @@
+---
+# Brings a freshly installed lab node to a known baseline, and pushes the task sheets
+# and graders onto the system under test.
+#
+#   ansible-playbook provision.yml
+#
+# Idempotent: run it as often as you like. Re-running after a practice session is the
+# fastest way to reset the study material without rolling back the whole VM.
+
+- name: Baseline every lab node
+  hosts: lab
+  gather_facts: true
+
+  vars:
+    lab_packages:
+      - vim-enhanced
+      - bash-completion
+      - tar
+      - policycoreutils-python-utils   # semanage — needed for the SELinux port task
+      - lvm2
+      - cronie
+      - chrony
+
+  tasks:
+    - name: Install the tooling every practice task assumes exists
+      ansible.builtin.dnf:
+        name: "{{ lab_packages }}"
+        state: present
+
+    # Deliberately NOT using ansible.posix.selinux — that lives in a collection, and
+    # bare ansible-core on a minimal RHEL install does not ship it. Two builtin tasks
+    # do the same job with no dependency to install.
+    - name: Set SELinux to enforcing at boot (persistent)
+      ansible.builtin.lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: 'SELINUX=enforcing'
+
+    - name: Check the current SELinux mode
+      ansible.builtin.command: getenforce
+      register: selinux_mode
+      changed_when: false          # a read never counts as a change
+
+    - name: Set SELinux to enforcing now (runtime)
+      ansible.builtin.command: setenforce 1
+      when: selinux_mode.stdout != "Enforcing"
+
+    - name: Enable the services the tasks are graded against
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: true
+        state: started
+      loop:
+        - crond
+        - chronyd
+        - firewalld
+      failed_when: false
+
+    - name: Seed the source file used by the text-filtering task
+      ansible.builtin.copy:
+        dest: /etc/testfile
+        mode: '0644'
+        content: |
+          abcde one
+          xxx
+          abcde two
+          yyy
+          abcde three
+
+- name: Load practice material onto the system under test
+  hosts: control
+  gather_facts: false
+
+  tasks:
+    - name: Copy the task sheets
+      ansible.builtin.copy:
+        src: "../rhcsa/tasks/{{ item }}"
+        dest: "/root/{{ item }}"
+        mode: '0644'
+      loop:
+        - set1-core.md
+        - set2-services.md
+        - set3-variation.md
+        - set4-gaps.md
+
+    - name: Copy the graders
+      ansible.builtin.copy:
+        src: "../rhcsa/graders/{{ item }}"
+        dest: "/root/{{ item }}"
+        mode: '0755'
+      loop:
+        - grade1.sh
+        - grade2.sh
+        - grade3.sh
+        - grade4.sh
+
+    - name: Copy the reference material
+      ansible.builtin.copy:
+        src: "../rhcsa/reference/"
+        dest: /root/reference/
+        mode: '0644'
+
+    - name: Show what to do next
+      ansible.builtin.debug:
+        msg:
+          - "Tasks:  cat /root/set1-core.md"
+          - "Grade:  bash /root/grade1.sh -v"
+          - "Then reboot and grade again — the second run is the real score."

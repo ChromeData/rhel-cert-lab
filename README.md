@@ -45,6 +45,7 @@ a reboot. That distinction *is* the exam.
 | `rhcsa/tasks/` | 60 practice tasks across 4 sets, written from the published objectives |
 | `rhcsa/graders/` | Four graders. Inspect live state, score against a 70% pass mark |
 | `rhcsa/reference/` | Answer key, terse-command sheet, persistence rules, known pitfalls |
+| `ansible/` | Idempotent provisioning for the lab nodes — doubles as EX294 practice |
 | `exam/` | Exam paper UI — countdown timer, task navigation, flag/complete tracking |
 | `docs/COVERAGE.md` | **Every published objective mapped to a task and an automated check** |
 
@@ -88,6 +89,7 @@ label and runs the kickstart with zero keystrokes, so a full rebuild needs no in
 - [x] RHCSA — 60 tasks, 4 graders, full objective coverage
 - [x] Unattended provisioning (Windows/VirtualBox)
 - [x] Exam UI with timer
+- [x] Ansible provisioning — idempotent, pure `ansible-core`, no collections needed
 - [ ] Vagrant provisioning — portable, one command, any host
 - [ ] RHCE (EX294) — Ansible task sets and graders
 
