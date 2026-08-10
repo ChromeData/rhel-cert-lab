@@ -1,0 +1,9 @@
+# Purchased / third-party exam content — never publish
+.private/
+*.docx
+*.pdf
+
+# Local lab artifacts
+.ssh/
+*.vdi
+*.iso

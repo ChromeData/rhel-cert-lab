@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red Hat Certified System Administrator — Practice Exam</title>
+<style>
+  :root{
+    --rh-red:#ee0000; --rh-dark:#151515; --ink:#151515; --muted:#6a6e73;
+    --line:#d2d2d2; --bg:#f0f0f0; --panel:#ffffff; --ok:#3e8635; --warn:#f0ab00;
+    --mono:"Liberation Mono","DejaVu Sans Mono",Consolas,monospace;
+    --sans:"Red Hat Text","Liberation Sans","DejaVu Sans",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+
+  /* ---------- top bar ---------- */
+  header{background:var(--rh-dark);color:#fff;display:flex;align-items:center;
+         padding:0 16px;height:56px;gap:16px;position:sticky;top:0;z-index:20}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+  .brand .hat{width:26px;height:18px;background:var(--rh-red);
+               clip-path:polygon(0 100%,12% 62%,34% 44%,62% 40%,84% 26%,100% 40%,100% 100%);}
+  .brand small{display:block;font-weight:400;font-size:11px;color:#b8bbbe;letter-spacing:.4px}
+  header .spacer{flex:1}
+  .timer{font-family:var(--mono);font-size:22px;font-weight:700;padding:4px 12px;
+         border:1px solid #444;border-radius:3px;background:#0b0b0b;min-width:118px;text-align:center}
+  .timer.low{color:#ff8a8a;border-color:#a30000;animation:pulse 1.4s infinite}
+  .timer.over{color:#ff5555;border-color:#ee0000}
+  @keyframes pulse{50%{background:#2a0000}}
+  header button{font:inherit;font-size:13px;background:#3c3f42;color:#fff;border:1px solid #57595c;
+                padding:6px 12px;border-radius:3px;cursor:pointer}
+  header button:hover{background:#4d5155}
+  header button.primary{background:var(--rh-red);border-color:var(--rh-red);font-weight:600}
+  header button.primary:hover{background:#c00}
+
+  /* ---------- layout ---------- */
+  .wrap{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 56px)}
+  nav{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto}
+  .examsel{padding:12px;border-bottom:1px solid var(--line);background:#fafafa}
+  .examsel label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+                 color:var(--muted);margin-bottom:5px;font-weight:600}
+  .examsel select{width:100%;font:inherit;padding:6px;border:1px solid var(--line);border-radius:3px;background:#fff}
+  .tasklist{list-style:none;margin:0;padding:0}
+  .tasklist li{border-bottom:1px solid #eaeaea}
+  .tasklist button{width:100%;text-align:left;background:none;border:0;font:inherit;
+                   padding:10px 12px;cursor:pointer;display:flex;gap:9px;align-items:flex-start}
+  .tasklist button:hover{background:#f5f5f5}
+  .tasklist li.active button{background:#e7f1fa;box-shadow:inset 3px 0 0 #0066cc}
+  .tasklist .num{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:30px;padding-top:2px}
+  .tasklist .ttl{flex:1;font-size:13.5px}
+  .tasklist li.done .ttl{color:var(--muted);text-decoration:line-through}
+  .tasklist li.done .num::after{content:" ✓";color:var(--ok);font-weight:700}
+  .tasklist li.flag .num::after{content:" ⚑";color:var(--warn);font-weight:700}
+
+  /* ---------- main ---------- */
+  main{overflow-y:auto;padding:28px 40px 80px}
+  .paper{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+         max-width:860px;padding:28px 32px}
+  .crumbs{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+  h1{font-size:23px;margin:0 0 4px;font-weight:600}
+  .node{display:inline-block;font-family:var(--mono);font-size:12.5px;background:#151515;color:#fff;
+        padding:3px 9px;border-radius:3px;margin:10px 0 18px}
+  .body{font-size:15.5px}
+  .body p{margin:0 0 12px}
+  .body ul{margin:0 0 12px;padding-left:22px}
+  .body li{margin-bottom:5px}
+  .body code,.body kbd{font-family:var(--mono);font-size:13.5px;background:#f5f5f5;
+                       border:1px solid #e0e0e0;border-radius:2px;padding:1px 5px}
+  .note{border-left:3px solid var(--warn);background:#fdf7e7;padding:10px 14px;margin:16px 0;font-size:14px}
+  .actions{display:flex;gap:10px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
+           align-items:center;flex-wrap:wrap}
+  .actions button{font:inherit;padding:8px 15px;border:1px solid var(--line);background:#fff;
+                  border-radius:3px;cursor:pointer;font-size:14px}
+  .actions button:hover{background:#f5f5f5}
+  .actions button.mark{border-color:var(--ok);color:var(--ok);font-weight:600}
+  .actions button.mark.on{background:var(--ok);color:#fff}
+  .actions button.flagbtn{border-color:var(--warn);color:#96690a;font-weight:600}
+  .actions button.flagbtn.on{background:var(--warn);color:#151515}
+  .actions .grow{flex:1}
+
+  /* ---------- start screen ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(21,21,21,.97);z-index:50;
+           display:flex;align-items:center;justify-content:center;padding:24px}
+  .overlay .card{background:#fff;border-radius:4px;max-width:640px;padding:34px 38px}
+  .overlay h2{margin:0 0 6px;font-size:24px}
+  .overlay .sub{color:var(--muted);margin-bottom:20px;font-size:14px}
+  .overlay ul{padding-left:20px;font-size:14.5px}
+  .overlay li{margin-bottom:7px}
+  .cfg{display:flex;gap:16px;align-items:flex-end;margin:22px 0 6px;flex-wrap:wrap}
+  .cfg label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
+             font-weight:600;display:block;margin-bottom:5px}
+  .cfg select,.cfg input{font:inherit;padding:7px;border:1px solid var(--line);border-radius:3px}
+  .overlay button.go{background:var(--rh-red);color:#fff;border:0;font:inherit;font-size:16px;
+                     font-weight:600;padding:11px 26px;border-radius:3px;cursor:pointer;margin-top:14px}
+  .overlay button.go:hover{background:#c00}
+  .hidden{display:none !important}
+  footer{position:fixed;bottom:0;left:300px;right:0;background:#fff;border-top:1px solid var(--line);
+         padding:7px 40px;font-size:12.5px;color:var(--muted);display:flex;gap:20px;align-items:center}
+  footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><div class="hat"></div>
+    <div>Red Hat Certified System Administrator<small>PRACTICE EXAM — EX200 FORMAT</small></div>
+  </div>
+  <div class="spacer"></div>
+  <button id="btnPause">Pause</button>
+  <button id="btnRestart">Restart</button>
+  <div class="timer" id="timer">--:--:--</div>
+</header>
+
+<div class="wrap">
+  <nav>
+    <div class="examsel">
+      <label for="examPick">Exam</label>
+      <select id="examPick"></select>
+    </div>
+    <ul class="tasklist" id="tasklist"></ul>
+  </nav>
+  <main>
+    <div class="paper" id="paper"></div>
+  </main>
+</div>
+
+<footer>
+  <span>Completed: <b id="statDone">0</b></span>
+  <span>Flagged: <b id="statFlag">0</b></span>
+  <span>Pass mark: <b>70%</b> (Red Hat: 210/300)</span>
+  <span style="margin-left:auto">Grade with <b>bash /root/grade&lt;N&gt;.sh -v</b> on node1</span>
+</footer>
+
+<div class="overlay" id="startScreen">
+  <div class="card">
+    <h2>Practice Exam — EX200 format</h2>
+    <div class="sub">Performance-based. No multiple choice. Either the system works at the end or it doesn't.</div>
+    <ul>
+      <li>All work is done on the systems <b>node1</b> and <b>node2</b>, not on this console.</li>
+      <li><b>Every configuration must survive a reboot.</b> A service that is running but not enabled scores zero.</li>
+      <li><code>man</code>, <code>--help</code> and <code>/usr/share/doc</code> are permitted. Nothing else is.</li>
+      <li>Root password on both systems: <code>Rhcsa!2026</code></li>
+      <li>When time is up, run the grader on node1 — then <b>reboot and grade again</b>.</li>
+    </ul>
+    <div class="cfg">
+      <div><label for="examStart">Exam set</label><select id="examStart"></select></div>
+      <div><label for="mins">Time limit (minutes)</label><input id="mins" type="number" value="180" min="15" max="360" style="width:110px"></div>
+    </div>
+    <button class="go" id="btnStart">Begin Exam</button>
+  </div>
+</div>
+
+<script>
+/* Exam task data. Wording kept terse and imperative to match EX200 style.
+   Answers deliberately absent - this is the exam paper, not the study guide. */
+const EXAMS = [
+{
+  name: "Practice Exam 1 — Core",
+  tasks: [
+    {id:"T01", node:"node1", title:"Configure networking",
+     body:"<p>Configure the host-only network interface with the following static values:</p><ul>"+
+          "<li>IPv4 address <code>192.168.56.101/24</code></li><li>Default gateway <code>192.168.56.1</code></li>"+
+          "<li>DNS server <code>192.168.56.1</code></li><li>Static hostname <code>node1.domain40.example.com</code></li></ul>"+
+          "<p>Additionally, add <code>10.0.0.5/24</code> as a <b>secondary</b> address on the same connection. "+
+          "Do this in a way that does not disturb the settings above.</p>"},
+    {id:"T02", node:"node1", title:"Create users and groups",
+     body:"<p>Create the users <code>harry</code>, <code>natasha</code> and <code>tom</code>.</p><ul>"+
+          "<li><code>harry</code> and <code>natasha</code> must have <code>admin</code> as a supplementary group.</li>"+
+          "<li><code>tom</code> must have a non-interactive login shell.</li></ul>"},
+    {id:"T03", node:"node1", title:"Create a user with a fixed UID",
+     body:"<p>Create the user <code>alex</code> with UID <code>1234</code> and the password <code>alex111</code>.</p>"},
+    {id:"T04", node:"node1", title:"Collaborative directory",
+     body:"<p>Create the directory <code>/home/admins</code>, group-owned by <code>admin</code>, such that:</p><ul>"+
+          "<li>Members of <code>admin</code> can read and write.</li><li>All other users have no access whatsoever.</li>"+
+          "<li>Files created inside automatically belong to the <code>admin</code> group.</li></ul>"},
+    {id:"T05", node:"node1", title:"Schedule a recurring task",
+     body:"<p>Schedule <code>/bin/echo hello</code> to run at <b>14:23 every day</b>, as root.</p>"},
+    {id:"T06", node:"node1", title:"Find and collect files",
+     body:"<p>Find all <b>regular files</b> owned by <code>harry</code> anywhere on the system and copy them "+
+          "to <code>/opt/dir</code>, preserving ownership and permissions.</p>"},
+    {id:"T07", node:"node1", title:"Filter file contents",
+     body:"<p>Write every line of <code>/etc/testfile</code> that contains the string <code>abcde</code> "+
+          "to <code>/tmp/testfile</code>, preserving the original order.</p>"},
+    {id:"T08", node:"node1", title:"Add swap space",
+     body:"<p>Add a <b>2 GiB</b> swap partition that activates automatically at boot. The existing swap must "+
+          "remain in place and active. Use one of the spare disks.</p><p>Reference it in <code>/etc/fstab</code> "+
+          "by <b>UUID</b>, not by device name.</p>",
+     note:"Spare disks on this system are <code>/dev/sdb</code> and <code>/dev/sdc</code>. Verify with <code>lsblk</code>."},
+    {id:"T09", node:"node1", title:"Configure a web server",
+     body:"<p>Install and configure Apache so that it serves a page containing the string <code>RHCSA-OK</code> "+
+          "at <code>http://192.168.56.101/</code>.</p><p>It must be reachable <b>from node2</b> and must still "+
+          "work after a reboot.</p>"},
+    {id:"T10", node:"node1", title:"Configure an FTP server",
+     body:"<p>Install and configure <code>vsftpd</code> to permit <b>anonymous download</b> from "+
+          "<code>/var/ftp/pub</code>.</p><p>Place a file named <code>README</code> in that directory. It must be "+
+          "retrievable from node2 and survive a reboot.</p>"},
+    {id:"T11", node:"node1", title:"Restrict network access",
+     body:"<p>Reject all traffic originating from the network <code>172.25.0.0/16</code>. All existing services "+
+          "must continue to work.</p><p>Do this without discarding your other firewall configuration.</p>"},
+    {id:"T12", node:"node1", title:"Set the default kernel",
+     body:"<p>Ensure the <b>newest installed kernel</b> is the default boot target, without removing the previous kernel.</p>"},
+    {id:"T13", node:"node1", title:"Configure a software repository",
+     body:"<p>Configure a <code>dnf</code> repository named <code>local</code> that uses the attached installation "+
+          "media, with GPG checking disabled. Mount the media under <code>/mnt</code>.</p>"+
+          "<p>It must be usable by <code>dnf</code> and must persist across reboots.</p>"},
+    {id:"T14", node:"node1", title:"SELinux mode and contexts",
+     body:"<p>SELinux must be in <b>enforcing</b> mode at boot.</p><p>The file served by Apache in the web server "+
+          "task must carry the correct SELinux type for web content.</p>"},
+    {id:"T15", node:"node1", title:"Create logical volumes",
+     body:"<p>Using a spare disk, create:</p><ul><li>Volume group <code>vgdata</code> with an <b>8 MiB</b> physical extent size</li>"+
+          "<li>Logical volume <code>lvdata</code> of <b>512 MiB</b>, formatted <code>xfs</code></li>"+
+          "<li>Mounted persistently at <code>/data</code></li></ul>"}
+  ]
+},
+{
+  name: "Practice Exam 2 — Services & Scripting",
+  tasks: [
+    {id:"T16", node:"node1", title:"Recover the root password",
+     body:"<p>Reboot the system and gain root access <b>without</b> knowing the current password. "+
+          "Set the root password to <code>Rhcsa!2026</code>.</p>",
+     note:"This is the single most commonly failed RHCSA task. Practise it until it is automatic."},
+    {id:"T17", node:"node1", title:"Shell script: argument handling",
+     body:"<p>Write <code>/usr/local/bin/reportuser</code> so that:</p><ul>"+
+          "<li>With <b>no</b> argument it prints <code>Usage: reportuser &lt;username&gt;</code> and exits <code>1</code></li>"+
+          "<li>With an <b>existing</b> username it prints that user's UID, primary group and shell</li>"+
+          "<li>With a <b>non-existent</b> username it prints <code>no such user: &lt;name&gt;</code> and exits <code>2</code></li></ul>"+
+          "<p>It must be executable by everyone.</p>"},
+    {id:"T18", node:"node1", title:"Shell script: loops",
+     body:"<p>Write <code>/usr/local/bin/sizes</code> which takes one directory as an argument and, for every "+
+          "<b>regular file</b> directly inside it, prints <code>&lt;filename&gt; &lt;size-in-bytes&gt;</code> — one per "+
+          "line, sorted largest first.</p><p>If the argument is not a directory, exit <code>1</code> with an error on stderr.</p>"},
+    {id:"T19", node:"node1", title:"Access control lists",
+     body:"<p>Create <code>/srv/shared/report.txt</code> owned by <code>root</code>, group <code>admin</code>, such that:</p><ul>"+
+          "<li><code>harry</code> has <b>read-write</b> access via ACL, regardless of group membership</li>"+
+          "<li><code>tom</code> has <b>no access at all</b> via ACL</li>"+
+          "<li>Everyone else has read-only access</li></ul><p>The ACLs must survive a reboot.</p>"},
+    {id:"T20", node:"node1", title:"Export an NFS share",
+     body:"<p>Export <code>/srv/nfsshare</code> read-write, restricted to the network "+
+          "<code>192.168.56.0/24</code> only. Create a file inside it.</p>"},
+    {id:"T21", node:"node2", title:"Mount an NFS share",
+     body:"<p>On <b>node2</b>, mount node1's <code>/srv/nfsshare</code> at <code>/mnt/remote</code> persistently. "+
+          "Verify you can read the file created in the previous task.</p>"},
+    {id:"T22", node:"node2", title:"Configure autofs",
+     body:"<p>On <b>node2</b>, configure <code>autofs</code> so that <code>/net/shared</code> automatically mounts "+
+          "node1's <code>/srv/nfsshare</code> on access and unmounts when idle.</p>",
+     note:"Disable the persistent mount from the previous task first — they will conflict."},
+    {id:"T23", node:"node1", title:"Log analysis and journal persistence",
+     body:"<p>Find every failed SSH login attempt since the last boot and write those lines to "+
+          "<code>/root/failed-logins.txt</code>.</p><p>Then make the system journal <b>persistent</b> across reboots.</p>"},
+    {id:"T24", node:"node1", title:"Time services",
+     body:"<p>Configure the system to synchronise time from <code>192.168.56.1</code>, set the timezone to "+
+          "<code>America/New_York</code>, and confirm NTP synchronisation is enabled.</p>"},
+    {id:"T25", node:"node1", title:"Tuning profiles",
+     body:"<p>Set the active <code>tuned</code> profile to <code>virtual-guest</code> and make it persist.</p>"+
+          "<p>Report which profile <code>tuned</code> recommends for this machine.</p>"},
+    {id:"T26", node:"node1", title:"Rootless container at boot",
+     body:"<p>As the user <code>harry</code>, using <b>rootless</b> <code>podman</code>:</p><ul>"+
+          "<li>Pull the <code>registry.access.redhat.com/ubi9/ubi</code> image</li>"+
+          "<li>Run a container named <code>webtest</code> that stays running</li>"+
+          "<li>Configure it to start automatically at boot as a systemd <b>user</b> service</li></ul>"},
+    {id:"T27", node:"node1", title:"Extend a logical volume",
+     body:"<p>Grow <code>vgdata/lvdata</code> to <b>1 GiB</b>, including the filesystem, <b>without unmounting it</b>.</p>"},
+    {id:"T28", node:"node1", title:"Second logical volume",
+     body:"<p>Create a logical volume <code>lvlogs</code> of <b>256 MiB</b>, formatted <code>ext4</code>, mounted "+
+          "persistently at <code>/var/log/archive</code> with the <code>noexec</code> option.</p>"},
+    {id:"T29", node:"node1", title:"Password aging",
+     body:"<p>For the user <code>natasha</code>:</p><ul><li>Password expires after <b>60 days</b></li>"+
+          "<li>Warn <b>10 days</b> before expiry</li><li>Account locks after <b>7 days</b> of password inactivity</li>"+
+          "<li>Force a password change at next login</li></ul>"},
+    {id:"T30", node:"node1", title:"Privileged access",
+     body:"<p>Configure sudo so that members of the <code>admin</code> group may run <b>only</b> "+
+          "<code>/usr/bin/systemctl</code> and <code>/usr/bin/journalctl</code> as root, without a password prompt.</p>"+
+          "<p>Nothing else. Verify as <code>harry</code>.</p>"}
+  ]
+},
+{
+  name: "Practice Exam 3 — Variation",
+  tasks: [
+    {id:"T31", node:"node1", title:"Configure networking",
+     body:"<p>Set the host-only interface to:</p><ul><li>IPv4 <code>192.168.56.150/24</code></li>"+
+          "<li>Gateway <code>192.168.56.1</code></li><li>DNS <code>8.8.8.8</code> <b>and</b> <code>192.168.56.1</code>, in that order</li>"+
+          "<li>Static hostname <code>server3.lab.example.com</code></li></ul>"},
+    {id:"T32", node:"node1", title:"Create users with constraints",
+     body:"<ul><li><code>dbadmin</code> — UID <code>2500</code>, primary group <code>dba</code>, shell <code>/bin/bash</code></li>"+
+          "<li><code>svcbackup</code> — system account, no home directory, non-interactive shell</li>"+
+          "<li><code>intern</code> — account expires on <code>2027-01-01</code></li></ul>"+
+          "<p>Password for <code>dbadmin</code> and <code>intern</code>: <code>Passw0rd!23</code></p>"},
+    {id:"T33", node:"node1", title:"Create and extract an archive",
+     body:"<p>Create <code>/root/etcbackup.tar.gz</code> containing <code>/etc/hosts</code>, <code>/etc/fstab</code> "+
+          "and <code>/etc/passwd</code>, preserving permissions.</p><p>Then extract it to <code>/tmp/restore/</code> "+
+          "so the files land as <code>/tmp/restore/etc/hosts</code> and so on.</p>"},
+    {id:"T34", node:"node1", title:"Hard and symbolic links",
+     body:"<p>In <code>/opt/links</code> create:</p><ul><li>A <b>hard</b> link named <code>hard-fstab</code> to <code>/etc/fstab</code></li>"+
+          "<li>A <b>symbolic</b> link named <code>soft-fstab</code> to <code>/etc/fstab</code></li></ul>"+
+          "<p>Write a one-line explanation to <code>/opt/links/NOTES.txt</code> of what happens to each if "+
+          "<code>/etc/fstab</code> is deleted.</p>"},
+    {id:"T35", node:"node1", title:"Default file permissions",
+     body:"<p>Set the system-wide default <code>umask</code> to <code>027</code> for all interactive login shells, "+
+          "so new files are created <code>640</code> and new directories <code>750</code>.</p>"+
+          "<p>It must apply to new logins after a reboot.</p>"},
+    {id:"T36", node:"node1", title:"Shared drop directory",
+     body:"<p>Create <code>/srv/dropbox</code> where any user can create files, but users can <b>only delete their "+
+          "own</b> files. The directory must be group-owned by <code>dba</code>.</p>"},
+    {id:"T37", node:"node1", title:"Find files by criteria",
+     body:"<p>Find every file under <code>/etc</code> larger than <b>100 KB</b> and modified within the last "+
+          "<b>30 days</b>. Write their full paths to <code>/root/bigrecent.txt</code>, one per line.</p>"},
+    {id:"T38", node:"node1", title:"Kernel tunable",
+     body:"<p>Make <code>net.ipv4.ip_forward</code> equal to <code>1</code> persistently, using a drop-in file — "+
+          "<b>not</b> by editing <code>/etc/sysctl.conf</code>.</p>"},
+    {id:"T39", node:"node1", title:"Default boot target",
+     body:"<p>Set the system default boot target to <code>multi-user.target</code> and confirm it.</p>"+
+          "<p>Report which target the system is in right now.</p>"},
+    {id:"T40", node:"node1", title:"Prevent a service from starting",
+     body:"<p>Install <code>httpd</code> but ensure it can never be started accidentally — mask it.</p>"+
+          "<p>Prove that <code>systemctl start httpd</code> fails.</p>"},
+    {id:"T41", node:"node1", title:"Swap file",
+     body:"<p>Add a <b>1 GiB</b> swap <b>file</b> at <code>/swapfile</code>, active at boot, without disturbing "+
+          "existing swap.</p>",
+     note:"This is a file, not a partition. The fstab syntax and the required permissions differ."},
+    {id:"T42", node:"node1", title:"Create a volume group and logical volume",
+     body:"<ul><li>Volume group <code>vgapp</code>, PE size <code>16M</code></li>"+
+          "<li>Logical volume <code>lvapp</code>, <b>768 MiB</b>, <code>ext4</code></li>"+
+          "<li>Mounted persistently at <code>/srv/app</code> with the <code>nodev</code> option</li></ul>"},
+    {id:"T43", node:"node1", title:"Shrink a volume and take a snapshot",
+     body:"<p>Shrink <code>lvapp</code> to <b>512 MiB</b> safely, then create a snapshot logical volume named "+
+          "<code>lvapp-snap</code> of <b>128 MiB</b>.</p>",
+     note:"<code>ext4</code> can be shrunk; <code>xfs</code> cannot. The order of operations matters."},
+    {id:"T44", node:"node1", title:"SELinux port label",
+     body:"<p>Configure <code>httpd</code> to listen on port <code>8088</code> with SELinux <b>enforcing</b>. "+
+          "Unmask the service first.</p><p>Confirm with <code>curl http://localhost:8088/</code>.</p>"},
+    {id:"T45", node:"node1", title:"Recover an unbootable system",
+     body:"<p>Add a deliberately invalid line to <code>/etc/fstab</code> referencing a non-existent UUID, then "+
+          "reboot. The system will drop to emergency mode.</p><p>Recover it without reinstalling, remove the bad "+
+          "line, and confirm a clean boot.</p>",
+     note:"A bad fstab entry is the classic way candidates lose an exam machine with 40 minutes left."}
+  ]
+},
+{
+  name: "Practice Exam 4 — Gap Closure",
+  tasks: [
+    {id:"T46", node:"node1", title:"Flatpak software management",
+     body:"<p>Install Flatpak support, add the Flathub remote, install any Flatpak application, list installed "+
+          "Flatpaks, then remove the one you installed.</p>"},
+    {id:"T47", node:"node1", title:"Key-based SSH authentication",
+     body:"<p>As <code>harry</code> on node1, generate an SSH keypair and deploy the public key so that "+
+          "<code>harry</code> can log into <b>node2</b> without a password.</p>"+
+          "<p>Then disable <b>password</b> authentication on node2's sshd entirely.</p>"},
+    {id:"T48", node:"node1", title:"SELinux booleans",
+     body:"<p>Allow <code>httpd</code> to make outbound network connections, persistently, using a boolean — "+
+          "not by disabling SELinux.</p><p>List every currently-enabled boolean whose name contains "+
+          "<code>httpd</code> and write them to <code>/root/httpd-booleans.txt</code>.</p>"},
+    {id:"T49", node:"node1", title:"systemd timer unit",
+     body:"<p>Replace a cron job with a systemd timer:</p><ul><li>A service unit <code>hello.service</code> "+
+          "running <code>/bin/echo hello</code></li><li>A timer unit <code>hello.timer</code> triggering it every "+
+          "<b>10 minutes</b></li><li>Enabled and active, surviving reboot</li></ul><p>Do not use cron.</p>"},
+    {id:"T50", node:"node1", title:"One-time scheduled job",
+     body:"<p>Schedule a one-time job using <code>at</code> that writes the date into <code>/root/at-ran.txt</code>, "+
+          "scheduled for <code>23:55</code> today. Confirm it is queued and that <code>atd</code> is enabled.</p>"},
+    {id:"T51", node:"node1", title:"VFAT filesystem",
+     body:"<p>On a spare disk, create a <b>1 GiB</b> partition formatted <b>VFAT</b>, mounted persistently at "+
+          "<code>/mnt/usbsim</code> by <b>UUID</b>.</p>"},
+    {id:"T52", node:"node1", title:"IPv6 addressing",
+     body:"<p>Add the static IPv6 address <code>fd00:56::101/64</code> to the host-only connection, persistently, "+
+          "without disturbing IPv4. Verify with <code>ping6</code>.</p>"},
+    {id:"T53", node:"node1", title:"Local hostname resolution",
+     body:"<p>Make <code>node2.lab.local</code> and <code>db.lab.local</code> both resolve to "+
+          "<code>192.168.56.102</code> locally, without DNS. Verify with <code>getent hosts</code>.</p>"},
+    {id:"T54", node:"node1", title:"Process management",
+     body:"<p>Start a CPU-intensive process in the background. Identify it by highest CPU usage and record its PID "+
+          "in <code>/root/hog.txt</code>. Renice it to priority <code>19</code>, then kill it.</p>"+
+          "<p>Leave <code>/root/hog.txt</code> in place.</p>"},
+    {id:"T55", node:"node1", title:"Boot into a specific target",
+     body:"<p>Reboot and interrupt the bootloader to boot <b>once</b> into <code>rescue.target</code> — without "+
+          "changing the default target.</p><p>Once there, create <code>/root/rescue-proof.txt</code> containing the "+
+          "output of <code>systemctl get-default</code>, then boot normally again.</p>"},
+    {id:"T56", node:"node1", title:"Secure file transfer",
+     body:"<p>Copy <code>/etc/redhat-release</code> from node1 to node2 at <code>/root/from-node1.txt</code> using "+
+          "<code>scp</code>.</p><p>Then use <code>rsync</code> to sync <code>/etc/sysconfig</code> from node1 to "+
+          "node2 at <code>/root/sysconfig-copy/</code>, preserving permissions.</p>"},
+    {id:"T57", node:"node1", title:"bzip2 archive",
+     body:"<p>Create <code>/root/logs.tar.bz2</code> containing <code>/var/log/messages</code> (or "+
+          "<code>/var/log/secure</code>), compressed with <b>bzip2</b> specifically — not gzip.</p>"+
+          "<p>Verify the compression type with <code>file</code>.</p>"},
+    {id:"T58", node:"node1", title:"Modify the bootloader",
+     body:"<p>Add the kernel boot parameter <code>quiet=0</code> to <b>all</b> installed kernels persistently, "+
+          "using <code>grubby</code>. Verify it is present in the boot entries, then remove it again cleanly.</p>"},
+    {id:"T59", node:"node1", title:"Diagnose and repair permissions",
+     body:"<p>Run the following to break it, then repair it:</p>"+
+          "<p><code>mkdir -p /srv/broken &amp;&amp; echo secret &gt; /srv/broken/data.txt</code><br>"+
+          "<code>chmod 000 /srv/broken /srv/broken/data.txt</code><br>"+
+          "<code>chown nobody:nobody /srv/broken/data.txt</code></p>"+
+          "<p>Make it so that <code>harry</code> can read and write <code>data.txt</code>; the file is owned by "+
+          "<code>root:admin</code>; and <code>/srv/broken</code> is traversable by everyone but writable only by "+
+          "<code>admin</code>.</p>"},
+    {id:"T60", node:"node1", title:"Switching users",
+     body:"<p>Verify you can switch to <code>harry</code> with a full login shell and land in his home directory.</p>"+
+          "<p>Write a one-line explanation of the difference between <code>su harry</code> and <code>su - harry</code> "+
+          "to <code>/root/su-difference.txt</code>.</p><p>Confirm <code>dbadmin</code> can escalate via <code>sudo -i</code>.</p>"}
+  ]
+}
+];
+
+</script>
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const KEY='rhcsa-exam-state';
+  let state={exam:0,idx:0,endsAt:null,paused:null,done:{},flag:{},limit:180};
+
+  function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+  function load(){try{const r=localStorage.getItem(KEY);if(r)state=Object.assign(state,JSON.parse(r))}catch(e){}}
+
+  function fillSelects(){
+    EXAMS.forEach((e,i)=>{
+      [$('#examPick'),$('#examStart')].forEach(sel=>{
+        const o=document.createElement('option');o.value=i;o.textContent=e.name;sel.appendChild(o);
+      });
+    });
+  }
+
+  function tasks(){return EXAMS[state.exam].tasks}
+  function key(i){return state.exam+':'+i}
+
+  function renderList(){
+    const ul=$('#tasklist');ul.innerHTML='';
+    tasks().forEach((t,i)=>{
+      const li=document.createElement('li');
+      if(i===state.idx)li.classList.add('active');
+      if(state.done[key(i)])li.classList.add('done');
+      if(state.flag[key(i)])li.classList.add('flag');
+      const b=document.createElement('button');
+      b.innerHTML='<span class="num">'+t.id+'</span><span class="ttl">'+t.title+'</span>';
+      b.onclick=()=>{state.idx=i;save();render()};
+      li.appendChild(b);ul.appendChild(li);
+    });
+    $('#statDone').textContent=Object.keys(state.done).filter(k=>state.done[k]&&k.startsWith(state.exam+':')).length;
+    $('#statFlag').textContent=Object.keys(state.flag).filter(k=>state.flag[k]&&k.startsWith(state.exam+':')).length;
+  }
+
+  function renderPaper(){
+    const t=tasks()[state.idx];
+    const isDone=!!state.done[key(state.idx)], isFlag=!!state.flag[key(state.idx)];
+    $('#paper').innerHTML=
+      '<div class="crumbs">'+EXAMS[state.exam].name+' &nbsp;·&nbsp; Task '+(state.idx+1)+' of '+tasks().length+'</div>'+
+      '<h1>'+t.title+'</h1>'+
+      '<div class="node">'+(t.node||'node1')+'</div>'+
+      '<div class="body">'+t.body+'</div>'+
+      (t.note?'<div class="note">'+t.note+'</div>':'')+
+      '<div class="actions">'+
+        '<button id="prev">← Previous</button>'+
+        '<button id="next">Next →</button>'+
+        '<div class="grow"></div>'+
+        '<button class="flagbtn'+(isFlag?' on':'')+'" id="flag">⚑ Flag for review</button>'+
+        '<button class="mark'+(isDone?' on':'')+'" id="mark">'+(isDone?'✓ Marked complete':'Mark complete')+'</button>'+
+      '</div>';
+    $('#prev').onclick=()=>{if(state.idx>0){state.idx--;save();render()}};
+    $('#next').onclick=()=>{if(state.idx<tasks().length-1){state.idx++;save();render()}};
+    $('#mark').onclick=()=>{const k=key(state.idx);state.done[k]=!state.done[k];save();render()};
+    $('#flag').onclick=()=>{const k=key(state.idx);state.flag[k]=!state.flag[k];save();render()};
+  }
+
+  function render(){$('#examPick').value=state.exam;renderList();renderPaper()}
+
+  function tick(){
+    const el=$('#timer');
+    if(!state.endsAt){el.textContent='--:--:--';return}
+    let ms=state.paused!==null?(state.endsAt-state.paused):(state.endsAt-Date.now());
+    const over=ms<0; if(over)ms=-ms;
+    const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000);
+    const p=n=>String(n).padStart(2,'0');
+    el.textContent=(over?'-':'')+p(h)+':'+p(m)+':'+p(s);
+    el.className='timer'+(over?' over':(ms<15*60000?' low':''));
+  }
+
+  function begin(){
+    state.exam=+$('#examStart').value;
+    state.limit=Math.max(15,Math.min(360,+$('#mins').value||180));
+    state.idx=0;state.done={};state.flag={};state.paused=null;
+    state.endsAt=Date.now()+state.limit*60000;
+    save();$('#startScreen').classList.add('hidden');render();tick();
+  }
+
+  $('#btnStart').onclick=begin;
+  $('#examPick').onchange=e=>{state.exam=+e.target.value;state.idx=0;save();render()};
+  $('#btnPause').onclick=()=>{
+    if(state.paused===null){state.paused=Date.now();$('#btnPause').textContent='Resume'}
+    else{state.endsAt+=Date.now()-state.paused;state.paused=null;$('#btnPause').textContent='Pause'}
+    save();tick();
+  };
+  $('#btnRestart').onclick=()=>{
+    if(confirm('Restart? This clears your completion marks and resets the clock.')){
+      localStorage.removeItem(KEY);location.reload();
+    }
+  };
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+    if(e.key==='ArrowLeft'&&state.idx>0){state.idx--;save();render()}
+    if(e.key==='ArrowRight'&&state.idx<tasks().length-1){state.idx++;save();render()}
+  });
+
+  fillSelects();load();
+  if(state.endsAt){$('#startScreen').classList.add('hidden');render()}
+  else{$('#examStart').value=0}
+  setInterval(tick,1000);tick();
+})();
+</script>
+</body>
+</html>
