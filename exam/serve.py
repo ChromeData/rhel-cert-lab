@@ -25,9 +25,16 @@ NODES = {
 }
 
 
-def launch_terminal(node):
-    """Open a real terminal window connected to the node. Windows-first, with
-    sensible fallbacks so the page still works on Linux/macOS hosts."""
+def launch_terminal(node, task=None):
+    """Open a REAL, VISIBLE terminal window connected to the node.
+
+    The CREATE_NEW_CONSOLE flag matters: without it the spawned shell inherits this
+    process's window state, so if serve.py was started hidden (or from a service) every
+    terminal it opens is invisible — the process runs, you just never see it.
+
+    If the page passed the current task, the window prints it above the prompt so the
+    question is in front of you while you work.
+    """
     info = NODES.get(node)
     if not info:
         return False, f"unknown node: {node}"
@@ -41,12 +48,38 @@ def launch_terminal(node):
 
     try:
         if platform.system() == "Windows":
-            ps1 = os.path.join(LAB, f"{node}.ps1")
-            if os.path.exists(ps1):
-                subprocess.Popen(["powershell.exe", "-NoExit", "-ExecutionPolicy",
-                                  "Bypass", "-File", ps1])
+            # Windows Terminal is the console host here. A plain CREATE_NEW_CONSOLE spawn
+            # from a non-interactive parent produces an orphan conhost with no surfaced
+            # window — the process runs and you never see it. Handing wt.exe a script on a
+            # space-free path is what reliably produces a real window.
+            os.makedirs(LAB, exist_ok=True)
+            script = os.path.join(LAB, f"_launch_{node}.ps1")
+            lines = [f'$Host.UI.RawUI.WindowTitle = "{info["title"]}"']
+            if task:
+                t = task.replace('"', "'").replace("`", "'")
+                lines += [
+                    'Write-Host ""',
+                    'Write-Host "================================================================" -ForegroundColor DarkGreen',
+                    f'Write-Host "  {t}" -ForegroundColor Green',
+                    'Write-Host "================================================================" -ForegroundColor DarkGreen',
+                    'Write-Host "  man lives on the node.  man -k <topic>  searches by description." -ForegroundColor DarkGray',
+                    'Write-Host ""',
+                ]
+            lines.append(ssh)
+            with open(script, "w", encoding="utf-8") as fh:
+                fh.write("\n".join(lines) + "\n")
+
+            wt = shutil.which("wt.exe") or shutil.which("wt")
+            if wt:
+                subprocess.Popen([wt, "powershell", "-NoExit", "-ExecutionPolicy",
+                                  "Bypass", "-File", script])
             else:
-                subprocess.Popen(["powershell.exe", "-NoExit", "-Command", ssh])
+                # No Windows Terminal — fall back to PowerShell's own Start-Process,
+                # which attaches to the interactive desktop where a bare spawn does not.
+                subprocess.Popen([
+                    "powershell.exe", "-NoProfile", "-Command",
+                    f"Start-Process powershell -ArgumentList '-NoExit','-ExecutionPolicy','Bypass','-File','{script}'"
+                ])
         else:
             for term in ("gnome-terminal", "konsole", "xterm"):
                 if shutil.which(term):
@@ -73,8 +106,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.startswith("/launch/"):
-            node = self.path.rsplit("/", 1)[-1]
-            ok, msg = launch_terminal(node)
+            from urllib.parse import urlparse, parse_qs, unquote
+            u = urlparse(self.path)
+            node = u.path.rsplit("/", 1)[-1]
+            task = (parse_qs(u.query).get("task") or [None])[0]
+            if task:
+                task = unquote(task)[:300]
+            ok, msg = launch_terminal(node, task)
             return self._json(200 if ok else 500, {"ok": ok, "msg": msg})
         if self.path == "/":
             self.path = "/exam.html"

@@ -673,7 +673,15 @@ $("#btnShuffle").onclick = ()=>{
 async function launch(node){
   try{
     const base = location.protocol.startsWith("http") ? "" : "http://127.0.0.1:8899";
-    const r = await fetch(base+"/launch/"+node);
+    // hand the terminal whatever task is open, so the question sits above the prompt
+    let q = "";
+    if (S.idx >= 0 && S.tasks[S.idx]) {
+      const t = S.tasks[S.idx];
+      const plain = t.body.replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
+      q = "?task=" + encodeURIComponent(
+            "Task " + String(S.idx+1).padStart(2,"0") + " - " + t.title + " :: " + plain.slice(0,200));
+    }
+    const r = await fetch(base+"/launch/"+node+q);
     const j = await r.json();
     toast(j.ok ? `Opened ${node} terminal` : `Failed: ${j.msg}`);
   }catch(err){
